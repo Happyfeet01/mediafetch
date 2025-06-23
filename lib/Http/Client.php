@@ -47,8 +47,15 @@ final class Client
 
         return $settings;
     }
-    public function request(string $url, $method, ?array $options = [])
+    /**
+     * Issue an HTTP request using the underlying Symfony client.
+     *
+     * @param string      $method  HTTP verb such as 'GET' or 'POST'
+     * @param string      $url     Target URL
+     * @param array|null  $options Additional request options
+     */
+    public function request(string $method, string $url, ?array $options = [])
     {
-        return $this->client->request($url, $method, $options);
+        return $this->client->request($method, $url, $options);
     }
 }
