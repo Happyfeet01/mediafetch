@@ -448,6 +448,10 @@ class Helper
             'downloadDir' => Helper::getRealDownloadDir(),
             'settings' => self::newSettings()->getYtdl(),
         ];
+        $proxy = self::newSettings()->get('ncd_proxy_url');
+        if (!empty($proxy)) {
+            $config['settings']['proxy'] = $proxy;
+        }
         return $config;
     }
 
@@ -463,8 +467,12 @@ class Helper
         $aria2Dir = $dataDir . "/aria2";
         $options['seed_time'] = $settings->get("ncd_seed_time");
         $options['seed_ratio'] = $settings->get("ncd_seed_ratio");
+        $proxy = $settings->get("ncd_proxy_url");
         if (is_array($customSettings = $settings->getAria2())) {
             $options = array_merge($customSettings, $options);
+        }
+        if (!empty($proxy)) {
+            $options['all-proxy'] = $proxy;
         }
         $token = Helper::getAdminSettings("ncd_aria2_rpc_token");
         $rpcHost = Helper::getAdminSettings("ncd_aria2_rpc_host");

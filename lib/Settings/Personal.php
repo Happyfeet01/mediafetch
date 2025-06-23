@@ -59,15 +59,22 @@ class Personal implements ISettings
 					"placeholder" => Helper::getDownloadDir() ?? "/downloads",
 					"path"    => $path,
 				],
-				[
-					"label" => "Torrents Folder",
-					"id" => "ncd_torrents_dir",
-					"value" => $this->settings->get("ncd_torrents_dir"),
-					"placeholder" => $this->settings->get("ncd_torrents_dir") ?? "/torrents",
-					"path" => $path,
-				]
-			]
-		];
+                                [
+                                        "label" => "Torrents Folder",
+                                        "id" => "ncd_torrents_dir",
+                                        "value" => $this->settings->get("ncd_torrents_dir"),
+                                        "placeholder" => $this->settings->get("ncd_torrents_dir") ?? "/torrents",
+                                        "path" => $path,
+                                ],
+                                [
+                                        "label" => "Proxy URL",
+                                        "id" => "ncd_proxy_url",
+                                        "value" => $this->settings->get("ncd_proxy_url"),
+                                        "placeholder" => "http://127.0.0.1:8080",
+                                        "path" => $path,
+                                ]
+                        ]
+                ];
 
 		//\OC_Util::addScript($this->appName, 'common');
 		//\OC_Util::addScript($this->appName, 'settings/personal');

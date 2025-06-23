@@ -76,6 +76,12 @@ window.addEventListener('DOMContentLoaded', function () {
         }).send();
     })
     eventHandler.add("click", "#app-navigation", "#search-download", helper.showDownload);
+    const navToggle = document.getElementById('mobile-nav-toggle');
+    if (navToggle) {
+        navToggle.addEventListener('click', function () {
+            document.getElementById('app-ncdownloader-wrapper').classList.toggle('nav-open');
+        });
+    }
     delegate('#app-ncdownloader-wrapper',
         { target: '[data-tippy-content]' }
     );
