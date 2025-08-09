@@ -3,6 +3,10 @@
 @import 'helpers';
 @import 'navigation';
 
+#app-navigation-toggle {
+    display: none;
+}
+
 #ncdownloader-settings-collapsible-container {
     padding-left: 4%;
 }
@@ -198,6 +202,18 @@
     }
 }
 @media only screen and (max-width: 600px) {
+    #app-navigation-toggle {
+        display: block;
+    }
+    #app-navigation {
+        display: none;
+    }
+    #app-navigation.opened {
+        display: block;
+    }
+    #app-ncdownloader-wrapper {
+        flex-direction: column;
+    }
     #app-navigation:not(.vue) {
         width: 100%;
     }
