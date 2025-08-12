@@ -1,5 +1,9 @@
 <?php
 extract($_);
+\OCP\Util::addHeader('meta', [
+    'name'    => 'viewport',
+    'content' => 'width=device-width, initial-scale=1'
+]);
 ?>
 <div id="app-ncdownloader-wrapper">
     <?php print_unescaped($this->inc('Navigation'));?>
