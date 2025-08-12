@@ -3,77 +3,21 @@
 namespace OCA\NCDownloader\Settings;
 
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Utility\ITimeFactory;
-use OCP\IConfig;
-use OCP\IDBConnection;
 use OCP\Settings\ISettings;
-use OCA\NCDownloader\Db\Settings;
-use OCA\NCDownloader\Tools\Helper;
 
 class Personal implements ISettings
 {
-
-	/** @var IDBConnection */
-	private $connection;
-	/** @var ITimeFactory */
-	private $timeFactory;
-	/** @var IConfig */
-	private $config;
-	private $uid;
-	private $settings;
-
-	public function __construct(
-		IDBConnection $connection,
-		ITimeFactory $timeFactory,
-		IConfig $config
-	) {
-		$this->connection = $connection;
-		$this->timeFactory = $timeFactory;
-		$this->config = $config;
-		$this->uid = \OC::$server->getUserSession()->getUser()->getUID();
-		$this->settings = new Settings($this->uid);
-	}
+        public function __construct()
+        {
+        }
 
 	/**
 	 * @return TemplateResponse
 	 */
 	public function getForm()
 	{
-		$path = '/apps/ncdownloader/personal/save';
-		$parameters = [
-			"settings" => [
-				"ncd_downloader_dir" => Helper::getDownloadDir(),
-				"ncd_torrents_dir" => $this->settings->get("ncd_torrents_dir"),
-				"ncd_seed_ratio" => $this->settings->get("ncd_seed_ratio"),
-				'ncd_seed_time_unit' => $this->settings->get("ncd_seed_time_unit"),
-				'ncd_seed_time' => $this->settings->get("ncd_seed_time"),
-				"path" => $path,
-				"disallow_aria2_settings" => Helper::getAdminSettings("disallow_aria2_settings"),
-				"is_admin" => \OC_User::isAdminUser($this->uid),
-			],
-			"options" => [
-				[
-					"label" => "Downloads Folder ",
-					"id" => "ncd_downloader_dir",
-					"value" => Helper::getDownloadDir(),
-					"placeholder" => Helper::getDownloadDir() ?? "/downloads",
-					"path"    => $path,
-				],
-				[
-					"label" => "Torrents Folder",
-					"id" => "ncd_torrents_dir",
-					"value" => $this->settings->get("ncd_torrents_dir"),
-					"placeholder" => $this->settings->get("ncd_torrents_dir") ?? "/torrents",
-					"path" => $path,
-				]
-			]
-		];
-
-		//\OC_Util::addScript($this->appName, 'common');
-		//\OC_Util::addScript($this->appName, 'settings/personal');
-		//file_put_contents("/tmp/re.log",print_r($parameters,true));
-		return new TemplateResponse('ncdownloader', 'settings/Personal', $parameters, '');
-	}
+                return new TemplateResponse('ncdownloader', 'settings/Personal', [], '');
+        }
 
 	/**
 	 * @return string the section ID, e.g. 'sharing'

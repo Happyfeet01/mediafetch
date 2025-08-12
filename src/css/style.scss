@@ -197,3 +197,30 @@
         width: 135px;
     }
 }
+@media only screen and (max-width: 600px) {
+    #app-navigation:not(.vue) {
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+    body.app-navigation-open #app-navigation:not(.vue) {
+        transform: translateX(0);
+    }
+    #app-navigation:not(.vue) .app-navigation-entry-deleted {
+        transform: translateX(100%);
+    }
+    #app-content-wrapper {
+        flex-direction: column;
+    }
+    #ncdownloader-form-wrapper .form-input-wrapper {
+        flex-direction: column;
+        row-gap: 5px;
+    }
+    #ncdownloader-settings-form input[type=text] {
+        width: 100%;
+    }
+}
