@@ -14,6 +14,8 @@ return [
         ['name' => 'Ytdl#Delete', 'url' => '/ytdl/delete', 'verb' => 'POST'],
         ['name' => 'Ytdl#Redownload', 'url' => '/ytdl/redownload', 'verb' => 'POST'],
         ['name' => 'Search#Execute', 'url' => '/search', 'verb' => 'POST'],
+        ['name' => 'Vpn#start', 'url' => '/vpn/start', 'verb' => 'POST'],
+        ['name' => 'Vpn#stop', 'url' => '/vpn/stop', 'verb' => 'POST'],
         // AdminSettings
         ['name' => 'Settings#saveAdmin', 'url' => '/admin/save', 'verb' => 'POST'],
         ['name' => 'Settings#saveGlobalAria2', 'url' => '/admin/aria2/save', 'verb' => 'POST'],

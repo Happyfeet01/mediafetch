@@ -38,6 +38,16 @@ $downloadsList = [
         </button>
         <?php endif;?>
     </div>
+    <div class="app-navigation-new" id="start-vpn">
+        <button type="button" class="icon-power">
+            <?php print $l->t('Start VPN');?>
+        </button>
+    </div>
+    <div class="app-navigation-new" id="stop-vpn">
+        <button type="button" class="icon-close">
+            <?php print $l->t('Stop VPN');?>
+        </button>
+    </div>
     <?php endif;?>
     <ul>
         <?php foreach ($downloadsList as $value): ?>

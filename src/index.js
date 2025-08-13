@@ -75,6 +75,28 @@ window.addEventListener('DOMContentLoaded', function () {
             callback(parent, oldHtml, data);
         }).send();
     })
+    eventHandler.add("click", "#start-vpn", "button", function (e) {
+        const path = basePath + "/vpn/start";
+        let url = helper.generateUrl(path);
+        helper.httpClient(url).setHandler(function (data) {
+            if (data.error) {
+                helper.error(data.error);
+            } else if (data.message) {
+                helper.info(data.message);
+            }
+        }).send();
+    })
+    eventHandler.add("click", "#stop-vpn", "button", function (e) {
+        const path = basePath + "/vpn/stop";
+        let url = helper.generateUrl(path);
+        helper.httpClient(url).setHandler(function (data) {
+            if (data.error) {
+                helper.error(data.error);
+            } else if (data.message) {
+                helper.info(data.message);
+            }
+        }).send();
+    })
     eventHandler.add('click', '#app-navigation-toggle', function () {
         const nav = document.getElementById('app-navigation')
         if (nav) {
