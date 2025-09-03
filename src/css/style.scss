@@ -203,13 +203,13 @@
 }
 @media only screen and (max-width: 1024px) {
     #app-navigation-toggle {
-        display: block;
+        display: block !important;
     }
     #app-navigation {
-        display: none;
+        display: none !important;
     }
     #app-navigation.opened {
-        display: block;
+        display: block !important;
     }
     #app-ncdownloader-wrapper {
         flex-direction: column;
@@ -226,5 +226,14 @@
     }
     #ncdownloader-settings-form input[type=text] {
         width: 100%;
+    }
+}
+
+@media only screen and (min-width: 1025px) {
+    #app-navigation-toggle {
+        display: none !important;
+    }
+    #app-navigation {
+        display: flex !important;
     }
 }
