@@ -201,6 +201,24 @@
         width: 135px;
     }
 }
+
+@media only screen and (max-width: 1020px) {
+    #app-content,
+    #app-content-wrapper {
+        flex       : 1 1 auto;
+        margin-left: 0;
+    }
+
+    #app-content {
+        padding   : var(--body-padding, 16px);
+        box-sizing: border-box;
+    }
+
+    #app-content-wrapper {
+        padding        : var(--body-padding, 16px);
+        box-sizing     : border-box;
+    }
+}
 @media only screen and (max-width: 600px) {
     #app-navigation-toggle {
         display: block;
