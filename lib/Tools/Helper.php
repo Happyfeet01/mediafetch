@@ -8,7 +8,6 @@ use OCA\NCDownloader\Aria2\Options as aria2Options;
 use OCA\NCDownloader\Db\Settings;
 use OCP\IUser;
 use OC\Files\Filesystem;
-use OC_Util;
 use Psr\Log\LoggerInterface;
 use OCA\NCDownloader\Aria2\Aria2;
 use OCA\NCDownloader\Ytdl\Ytdl;
@@ -160,7 +159,19 @@ class Helper
     {
         if (!isset($filter)) {
             $filter = array(
-                'status', 'followedBy', 'totalLength', 'errorMessage', 'dir', 'uploadLength', 'completedLength', 'downloadSpeed', 'files', 'numSeeders', 'connections', 'gid', 'following',
+                'status',
+                'followedBy',
+                'totalLength',
+                'errorMessage',
+                'dir',
+                'uploadLength',
+                'completedLength',
+                'downloadSpeed',
+                'files',
+                'numSeeders',
+                'connections',
+                'gid',
+                'following',
             );
         }
         $value = array_filter($data, function ($k) use ($filter) {
@@ -225,8 +236,7 @@ class Helper
         if ($memcache->hasKey($program)) {
             return $memcache->get($program);
         }
-
-        $dataPath = \OC::$server->getSystemConfig()->getValue('datadirectory');
+        $dataPath = \OC::$server->get(\OCP\IConfig::class)->getSystemValue('datadirectory');
         $paths = ['/usr/local/sbin', '/usr/local/bin', '/usr/sbin', '/usr/bin', '/sbin', '/bin', '/opt/bin', $dataPath . "/bin"];
         $result = $default;
         $exeSniffer = new ExecutableFinder();
@@ -393,13 +403,13 @@ class Helper
 
     public static function getDataDir(): string
     {
-        return \OC::$server->getSystemConfig()->getValue('datadirectory');
+        return \OC::$server->get(\OCP\IConfig::class)->getSystemValue('datadirectory');
     }
 
     public static function getLocalFolder(string $path): string
     {
         if (self::getUID()) {
-            OC_Util::setupFS();
+            \OC_Util::setupFS();
             //get the real path of the file in the filesystem
             return \OC\Files\Filesystem::getLocalFile($path);
         }
@@ -497,7 +507,7 @@ class Helper
 
     public static function getAppPath(): string
     {
-        return \OC::$server->getAppManager()->getAppPath('ncdownloader');
+        return \OC::$server->get(\OCP\App\IAppManager::class)->getAppPath('ncdownloader');
     }
     public static function folderUpdated(string $dir): bool
     {

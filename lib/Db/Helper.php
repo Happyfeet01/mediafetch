@@ -12,7 +12,7 @@ class Helper
 
     public function __construct()
     {
-        $this->conn = \OC::$server->getDatabaseConnection();
+        $this->conn = \OC::$server->get(\OCP\IDBConnection::class);
         $this->queryBuilder = $this->conn->getQueryBuilder();
         $this->prefixedTable = $this->queryBuilder->getTableName($this->table);
         //$container = \OC::$server->query(\OCP\IServerContainer::class);
@@ -130,7 +130,7 @@ class Helper
 
     public function getDBType(): string
     {
-        return \OC::$server->getConfig()->getSystemValue('dbtype', "mysql");
+        return \OC::$server->get(\OCP\IConfig::class)->getSystemValue('dbtype', "mysql");
     }
 
     public function getExtra($data)

@@ -32,7 +32,7 @@ class YtdlController extends Controller
         parent::__construct($appName, $request);
         $this->appName = $appName;
         $this->uid = $UserId;
-        $this->urlGenerator = \OC::$server->getURLGenerator();
+        $this->urlGenerator = \OC::$server->get(\OCP\IURLGenerator::class);
         $this->l10n = $IL10N;
         $this->downloadDir = Helper::getDownloadDir();
         $this->dbconn = new DbHelper();
