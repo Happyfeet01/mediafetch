@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const { VueLoaderPlugin } = require('vue-loader')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const sass = require('sass');
 
 
 module.exports = {
@@ -39,7 +40,17 @@ module.exports = {
           // Translates CSS into CommonJS
           "css-loader",
           // Compiles Sass to CSS
-          "sass-loader",
+          {
+            loader: "sass-loader",
+            options: {
+              implementation: sass,
+              api: "modern",
+              sassOptions: {
+                quietDeps: true,
+                silenceDeprecations: ["import", "global-builtin"],
+              },
+            },
+          },
         ],
       },
       {

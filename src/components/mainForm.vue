@@ -138,7 +138,7 @@ export default {
 };
 </script>
 <style lang="scss">
-@import "../css/variables.scss";
+@use "../css/variables.scss" as *;
 
 #nc-vue-unified-form {
   display: flex;

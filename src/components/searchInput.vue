@@ -54,5 +54,5 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-@import "../css/variables.scss";
+@use "../css/variables.scss" as *;
 </style>

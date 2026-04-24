@@ -6,8 +6,10 @@ use Exception;
 use OCA\NCDownloader\Search\Sites\searchInterface;
 use OCA\NCDownloader\Aria2\Options as aria2Options;
 use OCA\NCDownloader\Db\Settings;
+use OCP\Files\Folder;
+use OCP\Files\IRootFolder;
+use OCP\Files\Storage\ILocalStorage;
 use OCP\IUser;
-use OC\Files\Filesystem;
 use Psr\Log\LoggerInterface;
 use OCA\NCDownloader\Aria2\Aria2;
 use OCA\NCDownloader\Ytdl\Ytdl;
@@ -182,7 +184,7 @@ class Helper
 
     public function getFolderName($folder, $prefix)
     {
-        $folder = ltrim($folder, $prefix);
+        $folder = ltrim($folder, (string) $prefix);
         return substr($folder, 0, strpos($folder, '/'));
     }
 
@@ -305,12 +307,12 @@ class Helper
     // the relative home folder of a nextcloud user,e.g. /admin/files
     public static function getUserFolder($uid = null): string
     {
-        if (!empty($rootFolder = Filesystem::getRoot())) {
-            return $rootFolder;
-        } else if (isset($uid)) {
-            return "/" . $uid . "/files";
+        $uid = $uid ?? self::getUID();
+        if (!$uid) {
+            return '';
         }
-        return '';
+
+        return '/' . $uid . '/files';
     }
 
     public static function generateGID($str = null)
@@ -398,7 +400,19 @@ class Helper
 
     public static function getMountPoints(): ?array
     {
-        return Filesystem::getMountPoints("/");
+        try {
+            $uid = self::getUID();
+            if (!$uid) {
+                return null;
+            }
+
+            \OC_Util::setupFS($uid);
+            $userFolder = \OC::$server->get(IRootFolder::class)->getUserFolder($uid);
+            return [$userFolder->getPath()];
+        } catch (\Throwable $e) {
+            self::debug('Failed to fetch mount points: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public static function getDataDir(): string
@@ -408,18 +422,17 @@ class Helper
 
     public static function getLocalFolder(string $path): string
     {
-         $uid = self::getUID();
-
-         if (!$uid) {
+        $uid = self::getUID();
+        if (!$uid) {
             return "";
-         }
+        }
 
         try {
             \OC_Util::setupFS($uid);
 
             $userFolder = \OC::$server
-              ->get(\OCP\Files\IRootFolder::class)
-              ->getUserFolder($uid);
+                ->get(IRootFolder::class)
+                ->getUserFolder($uid);
 
             $path = trim($path, '/');
 
@@ -437,7 +450,7 @@ class Helper
 
                 $node = $folder->get($part);
 
-                if (!$node instanceof \OCP\Files\Folder) {
+                if (!$node instanceof Folder) {
                     return "";
                 }
 
@@ -446,13 +459,22 @@ class Helper
 
             $storage = $folder->getStorage();
             $internalPath = $folder->getInternalPath();
-            $localFolder = $storage->getLocalFile($internalPath);
+            if ($storage instanceof ILocalStorage) {
+                $localFolder = $storage->getSourcePath($internalPath);
+                return is_string($localFolder) ? $localFolder : "";
+            }
 
-            return is_string($localFolder) ? $localFolder : "";
-          } catch (\Throwable $e) {
+            if (method_exists($storage, 'getLocalFile')) {
+                $localFolder = $storage->getLocalFile($internalPath);
+                return is_string($localFolder) ? $localFolder : "";
+            }
+
+            self::debug('Storage is not local for path "' . $path . '"');
+            return "";
+        } catch (\Throwable $e) {
             self::debug('Failed to resolve local folder "' . $path . '": ' . $e->getMessage());
             return "";
-          }
+        }
     }
 
     public static function getRealDownloadDir(): string
