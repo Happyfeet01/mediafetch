@@ -88,7 +88,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import "css/variables.scss";
+@use "css/variables.scss" as *;
 #ncdownloader-settings-collapsible-container {
   display: flex;
   flex-flow: column wrap;

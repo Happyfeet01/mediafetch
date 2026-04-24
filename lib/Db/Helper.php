@@ -1,6 +1,7 @@
 <?php
 namespace OCA\NCDownloader\Db;
 use OCA\NCDownloader\Tools\Helper as ToolsHelper;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 
 class Helper
 {
@@ -8,13 +9,10 @@ class Helper
     private $conn;
     private $table = "ncdownloader_info";
     private $prefixedTable;
-    public $queryBuilder;
-
     public function __construct()
     {
         $this->conn = \OC::$server->get(\OCP\IDBConnection::class);
-        $this->queryBuilder = $this->conn->getQueryBuilder();
-        $this->prefixedTable = $this->queryBuilder->getTableName($this->table);
+        $this->prefixedTable = $this->conn->getQueryBuilder()->getTableName($this->table);
         //$container = \OC::$server->query(\OCP\IServerContainer::class);
         //ToolsHelper::debug(get_class($container->query(\OCP\RichObjectStrings\IValidator::class)));
         //$this->conn = \OC::$server->query(Connection::class);//working only with 22
@@ -31,59 +29,58 @@ class Helper
     }
     public function getAll()
     {
-        //OC\DB\QueryBuilder\QueryBuilder
-        $queryBuilder = $this->queryBuilder
+        $queryBuilder = $this->conn->getQueryBuilder()
             ->select('filename', 'type', 'gid', 'timestamp', 'status')
             ->from($this->table)
-            ->execute();
-        return $queryBuilder->fetchAll();
+            ->executeQuery();
+        return $queryBuilder->fetchAllAssociative();
     }
 
     public function getByUid($uid)
     {
-        $queryBuilder = $this->queryBuilder
+        $queryBuilder = $this->conn->getQueryBuilder()
             ->select('*')
             ->from($this->table)
-            ->where('uid = :uid')
-            ->setParameter('uid', $uid)
-            ->execute();
-        return $queryBuilder->fetchAll();
+            ->where('uid = :uid');
+        $queryBuilder->setParameter('uid', $uid, IQueryBuilder::PARAM_STR);
+        $result = $queryBuilder->executeQuery();
+        return $result->fetchAllAssociative();
     }
 
     public function getUidByGid($gid)
     {
-        $queryBuilder = $this->queryBuilder
+        $queryBuilder = $this->conn->getQueryBuilder()
             ->select('uid')
             ->from($this->table)
-            ->where('gid = :gid')
-            ->setParameter('gid', $gid)
-            ->execute();
-        return $queryBuilder->fetchColumn();
+            ->where('gid = :gid');
+        $queryBuilder->setParameter('gid', $gid, IQueryBuilder::PARAM_STR);
+        $result = $queryBuilder->executeQuery();
+        return $result->fetchOne();
     }
 
     public function getYtdlByUid($uid)
     {
-        $qb = $this->queryBuilder
+        $qb = $this->conn->getQueryBuilder()
             ->select('*')
             ->from($this->table)
             ->where('uid = :uid')
             ->andWhere('type = :type')
-            ->setParameter('uid', $uid)
-            ->setParameter('type', ToolsHelper::DOWNLOADTYPE['YOUTUBE-DL'])
-            ->orderBy('id', 'DESC')
-            ->execute();
-        return $qb->fetchAll();
+            ->orderBy('id', 'DESC');
+        $qb->setParameter('uid', $uid, IQueryBuilder::PARAM_STR);
+        $qb->setParameter('type', ToolsHelper::DOWNLOADTYPE['YOUTUBE-DL'], IQueryBuilder::PARAM_INT);
+        $result = $qb->executeQuery();
+        return $result->fetchAllAssociative();
     }
 
     public function getByGid($gid)
     {
-        $queryBuilder = $this->queryBuilder
+        $queryBuilder = $this->conn->getQueryBuilder()
             ->select('*')
             ->from($this->table)
-            ->where('gid = :gid')
-            ->setParameter('gid', $gid)
-            ->execute();
-        return $queryBuilder->fetch();
+            ->where('gid = :gid');
+        $queryBuilder->setParameter('gid', $gid, IQueryBuilder::PARAM_STR);
+        $result = $queryBuilder->executeQuery();
+        return $result->fetchAssociative();
     }
 
     public function save(array $keys, $values = array(), $conditions = array())
@@ -93,11 +90,11 @@ class Helper
 
     public function deleteByGid($gid)
     {
-        $qb = $this->queryBuilder
+        $qb = $this->conn->getQueryBuilder()
             ->delete($this->table)
-            ->where('gid = :gid')
-            ->setParameter('gid', $gid);
-        return $qb->execute();
+            ->where('gid = :gid');
+        $qb->setParameter('gid', $gid, IQueryBuilder::PARAM_STR);
+        return $qb->executeStatement();
     }
     public function executeUpdate($sql, $values)
     {
@@ -106,26 +103,26 @@ class Helper
 
     public function updateStatus($gid, $status = 1)
     {
-        $query = $this->queryBuilder;
+        $query = $this->conn->getQueryBuilder();
         $query->update($this->table)
             ->set("status", $query->createNamedParameter($status))
-            ->where('gid = :gid')
-            ->setParameter('gid', $gid);
-        return $query->execute();
+            ->where('gid = :gid');
+        $query->setParameter('gid', $gid, IQueryBuilder::PARAM_STR);
+        return $query->executeStatement();
         //$sql = sprintf("UPDATE %s set status = ? WHERE gid = ?", $this->prefixedTable);
         //$this->execute($sql, [$status, $gid]);
     }
 
     public function updateFilename($gid, $filename)
     {
-        $query = $this->queryBuilder;
+        $query = $this->conn->getQueryBuilder();
         $query->update($this->table)
             ->set("filename", $query->createNamedParameter($filename))
             ->where('gid = :gid')
-            ->andWhere('filename = :filename')
-            ->setParameter('gid', $gid)
-            ->setParameter('filename', 'unknown');
-        return $query->execute();
+            ->andWhere('filename = :filename');
+        $query->setParameter('gid', $gid, IQueryBuilder::PARAM_STR);
+        $query->setParameter('filename', 'unknown', IQueryBuilder::PARAM_STR);
+        return $query->executeStatement();
     }
 
     public function getDBType(): string

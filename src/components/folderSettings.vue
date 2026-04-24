@@ -42,7 +42,7 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-@import "../css/variables.scss";
+@use "../css/variables.scss" as *;
 .downloader-folder-settings {
   width: 45px;
   height: 100%;
