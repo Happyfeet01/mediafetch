@@ -36,6 +36,11 @@ class Helper
         return $queryBuilder->fetchAllAssociative();
     }
 
+    public function getTableName(): string
+    {
+        return $this->conn->getQueryBuilder()->getTableName($this->table);
+    }
+
     public function getByUid($uid)
     {
         $queryBuilder = $this->conn->getQueryBuilder()
