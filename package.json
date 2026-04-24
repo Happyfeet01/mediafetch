@@ -1,76 +1,76 @@
 {
-	"name": "ncdownloader",
-	"description": "Nextcloud Frontend for youtube-dl and Aria2",
-	"version": "1.0.0",
-	"author": "Jiaxin Huang <freefallbenson@gmail.com>",
-	"contributors": [
-		"Jiaxin Huang <freefallbenson@gmail.com>"
-	],
-	"keywords": [
-		"nextcloud",
-		"ncdownloader",
-		"app",
-		"dev"
-	],
-	"bugs": {
-		"url": "https://github.com/shiningw/ncdownloader/issues"
-	},
-	"repository": {
-		"url": "https://github.com/shiningw/ncdownloader",
-		"type": "git"
-	},
-	"homepage": "https://github.com/shiningw/ncdownloader",
-	"license": "agpl",
-	"private": true,
-	"scripts": {
-		"build": "NODE_ENV=production webpack --progress --config webpack.app.js",
-		"test": "NODE_ENV=development webpack --progress --config webpack.app.js",
-		"watch": "NODE_ENV=development webpack --progress --watch --config webpack.app.js",
-		"lint": "eslint --ext .js,.vue src",
-		"lint:fix": "eslint --ext .js,.vue src --fix",
-		"stylelint": "stylelint src",
-		"stylelint:fix": "stylelint src --fix"
-	},
-	"dependencies": {
-		"chalk": "^5.0.0",
-		"toastr": "^2.1.4",
-		"v-tooltip": "^4.0.0-alpha.1",
-		"vuex": "^4.0.2"
-	},
-	"engines": {
-		"node": ">=14.0.0",
-		"npm": ">=7.0.0"
-	},
-	"devDependencies": {
-		"@babel/core": "^7.15.0",
-		"@babel/preset-env": "^7.15.0",
-		"@nextcloud/browserslist-config": "^2.2.0",
-		"@nextcloud/dialogs": "^3.1.2",
-		"@nextcloud/l10n": "^1.4.1",
-		"@nextcloud/router": "^2.0.0",
-		"@vue/compiler-sfc": "^3.2.20",
-		"babel-loader": "^8.2.2",
-		"bootstrap": "^5.1.0",
-		"css-loader": "^6.4.0",
-		"html-webpack-plugin": "^5.3.2",
-		"jquery": "^3.6.0",
-		"mini-css-extract-plugin": "^2.6.0",
-		"popper.js": "^1.16.1",
-		"sass": "^1.38.0",
-		"sass-loader": "^10.2.0",
-		"style-loader": "^3.3.0",
-		"svg-url-loader": "^7.1.1",
-		"svgo-loader": "^3.0.0",
-		"tippy.js": "^6.3.2",
-		"toastify-js": "^1.11.1",
-		"ts-loader": "^9.2.6",
-		"typescript": "^4.5.5",
-		"url-loader": "^4.1.1",
-		"validator": "^13.6.0",
-		"vue": "^3.2.20",
-		"vue-loader": "^16.0.0-beta.10",
-		"vue-svg-loader": "^0.17.0-beta.2",
-		"webpack": "^5.69.0",
-		"webpack-cli": "^4.9.0"
-	}
+  "name": "net-loader",
+  "description": "Standalone Nextcloud frontend for yt-dlp and aria2",
+  "version": "0.1.0",
+  "author": "Jiaxin Huang <freefallbenson@gmail.com>",
+  "contributors": [
+    "Jiaxin Huang <freefallbenson@gmail.com>"
+  ],
+  "keywords": [
+    "nextcloud",
+    "net-loader",
+    "app",
+    "dev"
+  ],
+  "bugs": {
+    "url": "https://github.com/net-loader/net-loader/issues"
+  },
+  "repository": {
+    "url": "https://github.com/net-loader/net-loader",
+    "type": "git"
+  },
+  "homepage": "https://github.com/net-loader/net-loader",
+  "license": "agpl",
+  "private": true,
+  "scripts": {
+    "build": "NODE_ENV=production webpack --progress --config webpack.app.js",
+    "test": "NODE_ENV=development webpack --progress --config webpack.app.js",
+    "watch": "NODE_ENV=development webpack --progress --watch --config webpack.app.js",
+    "lint": "eslint --ext .js,.vue src",
+    "lint:fix": "eslint --ext .js,.vue src --fix",
+    "stylelint": "stylelint src",
+    "stylelint:fix": "stylelint src --fix"
+  },
+  "dependencies": {
+    "chalk": "^5.0.0",
+    "toastr": "^2.1.4",
+    "v-tooltip": "^4.0.0-alpha.1",
+    "vuex": "^4.0.2"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=7.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@nextcloud/browserslist-config": "^2.2.0",
+    "@nextcloud/dialogs": "^3.1.2",
+    "@nextcloud/l10n": "^1.4.1",
+    "@nextcloud/router": "^2.0.0",
+    "@vue/compiler-sfc": "^3.2.20",
+    "babel-loader": "^8.2.2",
+    "bootstrap": "^5.1.0",
+    "css-loader": "^6.4.0",
+    "html-webpack-plugin": "^5.3.2",
+    "jquery": "^3.6.0",
+    "mini-css-extract-plugin": "^2.6.0",
+    "popper.js": "^1.16.1",
+    "sass": "^1.38.0",
+    "sass-loader": "^10.2.0",
+    "style-loader": "^3.3.0",
+    "svg-url-loader": "^7.1.1",
+    "svgo-loader": "^3.0.0",
+    "tippy.js": "^6.3.2",
+    "toastify-js": "^1.11.1",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.5.5",
+    "url-loader": "^4.1.1",
+    "validator": "^13.6.0",
+    "vue": "^3.2.20",
+    "vue-loader": "^16.0.0-beta.10",
+    "vue-svg-loader": "^0.17.0-beta.2",
+    "webpack": "^5.69.0",
+    "webpack-cli": "^4.9.0"
+  }
 }

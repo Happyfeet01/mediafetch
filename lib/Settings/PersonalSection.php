@@ -30,7 +30,7 @@ class PersonalSection implements IIconSection {
 	}
 
 	public function getName(): string {
-		return $this->l->t('NCDownloader Settings');
+		return $this->l->t('Net loader Settings');
 	}
 
 	public function getPriority(): int {

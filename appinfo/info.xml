@@ -1,30 +1,30 @@
 <?xml version="1.0"?>
 <info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>ncdownloader</id>
-    <name>NCDownloader</name>
-    <summary>Aria2 and youtube-dl web gui for nextcloud</summary>
+    <name>Net loader</name>
+    <summary>Standalone download manager UI for Nextcloud</summary>
     <description>
 Search for torrents within the app from mutiple BT sites;
 Control Aria2 and manage download tasks from the web;
 download videos from 700+ video sites(youtube,youku,vimo,dailymotion,twitter,facebook and the likes
     </description>
-    <version>1.0.24</version>
+    <version>0.1.0</version>
     <licence>agpl</licence>
     <author mail="freefallbenson@gmail.com" homepage="https://github.com/shiningw">jiaxinhuang</author>
     <namespace>NCDownloader</namespace>
     <category>tools</category>
-    <website>https://github.com/shiningw/ncdownloader</website>
-    <bugs>https://github.com/shiningw/ncdownloader/issues</bugs>
+    <website>https://github.com/net-loader/net-loader</website>
+    <bugs>https://github.com/net-loader/net-loader/issues</bugs>
     <screenshot>https://user-images.githubusercontent.com/3911975/142444998-54dd54a6-0c8e-4d49-8188-270964a99c50.png</screenshot>
     <screenshot>https://user-images.githubusercontent.com/3911975/142445020-27ec389a-5437-4d28-acc0-5e757fd6897d.png</screenshot>
-    <repository>https://github.com/shiningw/ncdownloader</repository>
+    <repository>https://github.com/net-loader/net-loader</repository>
     <dependencies>
         <php min-version="8.1" max-version="8.4" />
         <nextcloud min-version="28" max-version="32"/>
     </dependencies>
     <navigations>
         <navigation>
-            <name>NCDownloader</name>
+            <name>Net loader</name>
             <route>ncdownloader.Main.Index</route>
             <icon>ncdownloader.svg</icon>
         </navigation>
