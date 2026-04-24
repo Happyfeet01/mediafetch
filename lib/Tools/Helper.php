@@ -408,12 +408,51 @@ class Helper
 
     public static function getLocalFolder(string $path): string
     {
-        if (self::getUID()) {
-            \OC_Util::setupFS();
-            //get the real path of the file in the filesystem
-            return \OC\Files\Filesystem::getLocalFile($path);
-        }
-        return "";
+         $uid = self::getUID();
+
+         if (!$uid) {
+            return "";
+         }
+
+        try {
+            \OC_Util::setupFS($uid);
+
+            $userFolder = \OC::$server
+              ->get(\OCP\Files\IRootFolder::class)
+              ->getUserFolder($uid);
+
+            $path = trim($path, '/');
+
+            if ($path === '') {
+                return "";
+            }
+
+            $folder = $userFolder;
+
+            foreach (array_filter(explode('/', $path), 'strlen') as $part) {
+                if (!$folder->nodeExists($part)) {
+                    $folder = $folder->newFolder($part);
+                    continue;
+                }
+
+                $node = $folder->get($part);
+
+                if (!$node instanceof \OCP\Files\Folder) {
+                    return "";
+                }
+
+                $folder = $node;
+            }
+
+            $storage = $folder->getStorage();
+            $internalPath = $folder->getInternalPath();
+            $localFolder = $storage->getLocalFile($internalPath);
+
+            return is_string($localFolder) ? $localFolder : "";
+          } catch (\Throwable $e) {
+            self::debug('Failed to resolve local folder "' . $path . '": ' . $e->getMessage());
+            return "";
+          }
     }
 
     public static function getRealDownloadDir(): string
