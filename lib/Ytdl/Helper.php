@@ -18,7 +18,7 @@ class Helper
     public function __construct()
     {
         $this->dbconn = new DbHelper();
-        $this->tablename = $this->dbconn->queryBuilder->getTableName("ncdownloader_info");
+        $this->tablename = $this->dbconn->getTableName();
         $this->user = \OC::$server->get(\OCP\IUserSession::class)->getUser()->getUID();
     }
 

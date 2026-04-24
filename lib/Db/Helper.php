@@ -1,7 +1,7 @@
 <?php
 namespace OCA\NCDownloader\Db;
 use OCA\NCDownloader\Tools\Helper as ToolsHelper;
-use OCP\DB\IQueryBuilder;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 
 class Helper
 {
@@ -34,6 +34,11 @@ class Helper
             ->from($this->table)
             ->executeQuery();
         return $queryBuilder->fetchAllAssociative();
+    }
+
+    public function getTableName(): string
+    {
+        return $this->conn->getQueryBuilder()->getTableName($this->table);
     }
 
     public function getByUid($uid)
