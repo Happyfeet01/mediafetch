@@ -24,7 +24,6 @@ class YtdlController extends Controller
     private $ytdl;
     private $aria2;
     private $urlGenerator;
-    private $tablename;
     private $dataDir;
 
     public function __construct($appName, IRequest $request, $UserId, IL10N $IL10N, Aria2 $aria2, Ytdl $ytdl)
@@ -39,7 +38,6 @@ class YtdlController extends Controller
         $this->ytdl = $ytdl;
         $this->aria2 = $aria2;
         $this->aria2->init();
-        $this->tablename = $this->dbconn->queryBuilder->getTableName("ncdownloader_info");
     }
     /**
      * @NoAdminRequired
