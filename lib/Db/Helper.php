@@ -1,7 +1,7 @@
 <?php
 namespace OCA\NCDownloader\Db;
 use OCA\NCDownloader\Tools\Helper as ToolsHelper;
-use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\DB\IQueryBuilder;
 
 class Helper
 {
