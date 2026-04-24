@@ -20,7 +20,7 @@ download videos from 700+ video sites(youtube,youku,vimo,dailymotion,twitter,fac
     <repository>https://github.com/net-loader/net-loader</repository>
     <dependencies>
         <php min-version="8.1" max-version="8.4" />
-        <nextcloud min-version="28" max-version="32"/>
+        <nextcloud min-version="28" max-version="33"/>
     </dependencies>
     <navigations>
         <navigation>

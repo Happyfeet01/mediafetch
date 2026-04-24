@@ -19,7 +19,7 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-@import "../css/variables.scss";
+@use "../css/variables.scss" as *;
 #text-input-link {
   position: relative;
   width: 100%;

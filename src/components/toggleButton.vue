@@ -78,6 +78,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@use "sass:math";
+
 $toggle-height: 25px;
 $toggle-width: 45px;
 $bg-color: #e5e5ee;
@@ -104,7 +106,7 @@ $bg-color: #e5e5ee;
 .toggle-button .toggle-switch {
   display: inline-block;
   height: $toggle-height;
-  border-radius: $toggle-height / 3;
+  border-radius: math.div($toggle-height, 3);
   width: $toggle-width;
   background: $bg-color;
   box-shadow: inset 0 0 1px #b1bbc7;
@@ -118,7 +120,7 @@ $bg-color: #e5e5ee;
   position: absolute;
   display: block;
   height: $toggle-height;
-  width: $toggle-width / 2;
+  width: math.div($toggle-width, 2);
   border-radius: 50%;
   left: 0;
   transform: translateX(0);
@@ -136,7 +138,7 @@ $bg-color: #e5e5ee;
 }
 
 .active .toggle-switch::after {
-  transform: translateX($toggle-width / 2);
+  transform: translateX(math.div($toggle-width, 2));
   background: #488c68;
   box-shadow: 0 0 1px #53b883;
 }
