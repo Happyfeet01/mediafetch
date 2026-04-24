@@ -79,16 +79,21 @@ class YtdlController extends Controller
     /**
      * @NoAdminRequired
      */
-    public function Download(string $url, ?string $extension = "mp4")
+    public function Download(?string $url = null, ?string $extension = null)
     {
+        $url = $url ?? $this->request->getParam('url') ?? $this->request->getParam('text-input-value');
+        $extension = $extension ?? $this->request->getParam('extension') ?? "mp4";
+        $extension = trim((string) $extension) ?: "mp4";
+        if (!$url || !is_string($url)) {
+            return new JSONResponse(['error' => "no url value is received!"]);
+        }
         $dlDir = $this->ytdl->getDownloadDir();
         if (!is_writable($dlDir)) {
             return new JSONResponse(['error' => sprintf("%s is not writable", $dlDir)]);
         }
-        //$url = trim($this->request->getParam('text-input-value'));
         $url = trim($url);
         $yt = $this->ytdl;
-        if (in_array($extension, $this->audio_extensions)) {
+        if (in_array($extension, $this->audio_extensions, true)) {
             $yt->audioOnly = true;
             $yt->audioFormat = $extension;
         } else {
