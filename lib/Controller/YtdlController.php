@@ -24,7 +24,6 @@ class YtdlController extends Controller
     private $ytdl;
     private $aria2;
     private $urlGenerator;
-    private $tablename;
     private $dataDir;
 
     public function __construct($appName, IRequest $request, $UserId, IL10N $IL10N, Aria2 $aria2, Ytdl $ytdl)
@@ -39,7 +38,6 @@ class YtdlController extends Controller
         $this->ytdl = $ytdl;
         $this->aria2 = $aria2;
         $this->aria2->init();
-        $this->tablename = $this->dbconn->queryBuilder->getTableName("ncdownloader_info");
     }
     /**
      * @NoAdminRequired
@@ -119,14 +117,17 @@ class YtdlController extends Controller
     /**
      * @NoAdminRequired
      */
-    public function Delete(string $gid)
+    public function Delete(?string $gid = null)
     {
-        //$gid = $this->request->getParam('gid');
+        $gid = $gid ?? $this->request->getParam('gid');
         if (!$gid) {
             return new JSONResponse(['error' => "no gid value is received!"]);
         }
 
         $row = $this->dbconn->getByGid($gid);
+        if (!$row || !isset($row['data'])) {
+            return new JSONResponse(['error' => sprintf("%s was not found in database!", $gid)]);
+        }
         $data = $this->dbconn->getExtra($row["data"]);
         if (!isset($data['pid'])) {
             if ($this->dbconn->deleteByGid($gid)) {
@@ -154,13 +155,16 @@ class YtdlController extends Controller
     /**
      * @NoAdminRequired
      */
-    public function Redownload(string $gid)
+    public function Redownload(?string $gid = null)
     {
-        //$gid = $this->request->getParam('gid');
+        $gid = $gid ?? $this->request->getParam('gid');
         if (!$gid) {
             return new JSONResponse(['error' => "no gid value is received!"]);
         }
         $row = $this->dbconn->getByGid($gid);
+        if (!$row || !isset($row['data'])) {
+            return new JSONResponse(['error' => sprintf("%s was not found in database!", $gid)]);
+        }
         $data = $this->dbconn->getExtra($row["data"]);
         if (!empty($data['link'])) {
             if (isset($data['ext'])) {
