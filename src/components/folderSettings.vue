@@ -8,8 +8,7 @@
     :title="title"
     :aria-label="title"
   >
-    <span class="folder-icon" aria-hidden="true"></span>
-    <span class="folder-label">Folder</span>
+    {{ buttonLabel }}
   </button>
 </template>
 <script>
@@ -21,6 +20,9 @@ export default {
   computed: {
     title() {
       return t("ncdownloader", "Set Download Folder");
+    },
+    buttonLabel() {
+      return t("ncdownloader", "Choose folder");
     },
   },
   methods: {
@@ -57,45 +59,32 @@ export default {
 @use "../css/variables.scss" as *;
 
 .downloader-folder-settings {
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-width: 45px;
-  height: 100%;
-  padding: 0 12px;
-  border: 1px solid var(--color-border, #5a5a5a);
-  border-radius: 0;
-  background-color: var(--color-background-dark, #202020);
-  color: var(--color-main-text, #fff);
+  min-width: 130px;
+  min-height: 42px;
+  height: 100% !important;
+  padding: 0 12px !important;
+  border: 1px solid var(--color-border, #5a5a5a) !important;
+  border-radius: var(--border-radius-element, 4px);
+  background-color: var(--color-main-background, #fff) !important;
+  color: var(--color-main-text, #222) !important;
   cursor: pointer;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 14px;
 
   &:hover,
   &:focus {
-    background-color: var(--color-primary-element-light, #3c5a80);
+    background-color: var(--color-background-hover, #eef4f8) !important;
   }
-}
-
-.folder-icon {
-  display: inline-block;
-  width: 22px;
-  height: 22px;
-  background: center / contain no-repeat url("../../img/folder.svg");
-}
-
-.folder-label {
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1;
 }
 
 @media only screen and (max-width: 768px) {
   .downloader-folder-settings {
-    padding: 0 10px;
-  }
-
-  .folder-label {
-    display: none;
+    min-width: 100%;
+    padding: 0 10px !important;
   }
 }
 </style>
