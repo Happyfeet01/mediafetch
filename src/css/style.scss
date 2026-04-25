@@ -11,6 +11,52 @@
 #app-ncdownloader-wrapper {
     width: 100%;
     display: flex;
+    min-height: 100%;
+    border-radius: var(--border-radius-large, 12px);
+    overflow: hidden;
+
+    #app-content,
+    #app-content-wrapper,
+    .ncdownloader-body-wrapper,
+    #ncdownloader-form-wrapper,
+    #ncdownloader-table-wrapper {
+        background: transparent;
+    }
+
+    #app-content {
+        background-color: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    #app-navigation:not(.vue) {
+        border-right: 1px solid var(--color-border, #d8d8d8);
+
+        .app-navigation-new {
+            padding: calc(var(--default-grid-baseline) * 1.5);
+        }
+
+        .app-navigation-new button {
+            border-radius: var(--border-radius-element, 8px);
+            background-color: var(--color-main-background, #fff);
+            color: var(--color-main-text, #222);
+        }
+
+        > ul {
+            padding-top: calc(var(--default-grid-baseline) * 1.5);
+            gap: 2px;
+        }
+
+        .download-queue > a {
+            padding-left: 44px;
+            border-radius: var(--border-radius-element, 8px);
+        }
+
+        .download-queue .number {
+            background-color: var(--color-background-darker, #5f5853);
+            color: var(--color-main-text, #fff);
+        }
+    }
 
     .action-item {
         position: relative;
@@ -52,7 +98,7 @@
         background-image: url('../../img/clippy.svg');
     }
     #ncdownloader-form-wrapper {
-        margin-left: 2px;
+        margin-left: 0;
 
         .form-input-wrapper {
             display  : flex;

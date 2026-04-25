@@ -202,6 +202,9 @@ export default {
       }
       & > div[class$="-controls-container"] {
         display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
         & div,
         & select {
           height: 100%;
@@ -283,7 +286,7 @@ export default {
       }
       & > div[class$="-controls-container"] {
         display: flex;
-        justify-content: center;
+        justify-content: flex-start;
       }
     }
   }
