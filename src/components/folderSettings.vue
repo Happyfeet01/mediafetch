@@ -9,7 +9,7 @@
     :aria-label="title"
   >
     <span class="folder-icon" aria-hidden="true"></span>
-    <span class="folder-label">{{ buttonLabel }}</span>
+    <span class="folder-label">Folder</span>
   </button>
 </template>
 <script>
@@ -21,9 +21,6 @@ export default {
   computed: {
     title() {
       return t("ncdownloader", "Set Download Folder");
-    },
-    buttonLabel() {
-      return t("ncdownloader", "Folder");
     },
   },
   methods: {
@@ -64,26 +61,25 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-width: 48px;
+  min-width: 45px;
   height: 100%;
-  padding: 0 12px !important;
-  border: 1px solid var(--color-border, #5a5a5a) !important;
-  border-radius: var(--border-radius-element, 4px);
-  background-color: var(--color-main-background, #fff) !important;
-  color: var(--color-main-text, #222) !important;
+  padding: 0 12px;
+  border: 1px solid var(--color-border, #5a5a5a);
+  border-radius: 0;
+  background-color: var(--color-background-dark, #202020);
+  color: var(--color-main-text, #fff);
   cursor: pointer;
-  white-space: nowrap;
 
   &:hover,
   &:focus {
-    background-color: var(--color-background-hover, #eef4f8) !important;
+    background-color: var(--color-primary-element-light, #3c5a80);
   }
 }
 
 .folder-icon {
   display: inline-block;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   background: center / contain no-repeat url("../../img/folder.svg");
 }
 
@@ -95,8 +91,7 @@ export default {
 
 @media only screen and (max-width: 768px) {
   .downloader-folder-settings {
-    min-width: 44px;
-    padding: 0 10px !important;
+    padding: 0 10px;
   }
 
   .folder-label {
