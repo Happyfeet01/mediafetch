@@ -1,58 +1,73 @@
 <?php
 
-declare (strict_types = 1);
-/**
- * @copyright Copyright (c) 2020 Joas Schilling <coding@schilljs.com>
- *
- * @author Joas Schilling <coding@schilljs.com>
- *
- * @license GNU AGPL version 3 or any later version
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
+declare(strict_types=1);
+
 namespace OCA\NCDownloader\Migration;
 
 use Closure;
 use OCP\DB\ISchemaWrapper;
-use OCP\IDBConnection;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
 class Version00002date20210912 extends SimpleMigrationStep
 {
-
-    /** @var IDBConnection */
-    protected $connection;
-
-    public function __construct(IDBConnection $connection)
-    {
-        $this->connection = $connection;
-    }
-
-    /**
-     * @param IOutput $output
-     * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
-     * @param array $options
-     * @return null|ISchemaWrapper
-     */
-    public function changeSchema(IOutput $output, Closure $schemaClosure, array $options)
+    public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
-        $table = $schema->getTable('ncdownloader_info');
+        // A failed beta install may already have recorded migration 00001 while
+        // still using the legacy ncdownloader_info table. Be defensive and
+        // create the MediaFetch table here as well if it is missing.
+        if (!$schema->hasTable('mediafetch_info')) {
+            $table = $schema->createTable('mediafetch_info');
+            $table->addColumn('id', 'integer', [
+                'autoincrement' => true,
+                'notnull' => true,
+                'length' => 10,
+            ]);
+            $table->addColumn('uid', 'string', [
+                'notnull' => false,
+                'length' => 64,
+            ]);
+            $table->addColumn('gid', 'string', [
+                'notnull' => true,
+                'length' => 32,
+            ]);
+            $table->addColumn('filename', 'string', [
+                'notnull' => true,
+                'length' => 255,
+            ]);
+            $table->addColumn('type', 'smallint', [
+                'notnull' => true,
+                'length' => 4,
+                'default' => 1,
+                'comment' => 'Download Type(Aria2 = 1, yt-dlp = 2, Others = 3)',
+            ]);
+            $table->addColumn('status', 'smallint', [
+                'notnull' => true,
+                'length' => 1,
+                'default' => 1,
+            ]);
+            $table->addColumn('followedby', 'string', [
+                'notnull' => true,
+                'length' => 16,
+                'default' => '0',
+            ]);
+            $table->addColumn('timestamp', 'bigint', [
+                'notnull' => true,
+                'length' => 15,
+                'default' => 0,
+            ]);
+            $table->addColumn('data', 'blob', [
+                'notnull' => false,
+                'default' => null,
+            ]);
+            $table->setPrimaryKey(['id']);
+        } else {
+            $table = $schema->getTable('mediafetch_info');
+        }
+
         if (!$table->hasColumn('speed')) {
             $table->addColumn('speed', 'string', [
                 'notnull' => true,
@@ -74,8 +89,10 @@ class Version00002date20210912 extends SimpleMigrationStep
                 'default' => '',
             ]);
         }
-        $table->addUniqueIndex(['gid'], 'gid_index');
+        if (!$table->hasIndex('mediafetch_gid_index')) {
+            $table->addUniqueIndex(['gid'], 'mediafetch_gid_index');
+        }
+
         return $schema;
     }
-
 }
