@@ -1,86 +1,84 @@
 import helper from './utils/helper'
 import eventHandler from './lib/eventHandler'
-import { translate as t, translatePlural as n } from '@nextcloud/l10n'
+import { translate as t } from '@nextcloud/l10n'
 import updatePage from './actions/updatePage'
 import buttonActions from './actions/buttonActions'
 import './css/style.scss'
 import './css/table.scss'
 import { createApp } from 'vue'
-import App from './App';
-import tippy, { delegate } from 'tippy.js';
-import 'tippy.js/dist/tippy.css';
-import settingsBar from './settingsBar';
-const basePath = "/apps/ncdownloader";
+import App from './App'
+import { delegate } from 'tippy.js'
+import 'tippy.js/dist/tippy.css'
+import settingsBar from './settingsBar'
 
+const APP_ID = 'mediafetch'
+const basePath = `/apps/${APP_ID}`
 
 window.addEventListener('DOMContentLoaded', function () {
+    helper.showErrors('[data-error-message]')
+    updatePage.run()
+    buttonActions.run()
 
-    helper.showErrors('[data-error-message]');
-    updatePage.run();
-    buttonActions.run();
-    let container = 'ncdownloader-form-wrapper';
-    const dataContainerID = "app-settings-data";
-    let app = createApp(App);
-    let bar = createApp(settingsBar);
+    const container = 'ncdownloader-form-wrapper'
+    const dataContainerID = 'app-settings-data'
+    const app = createApp(App)
+    const bar = createApp(settingsBar)
+    const dataContainer = document.getElementById(dataContainerID)
 
-    const dataContainer = document.getElementById(dataContainerID);
-    let values = {};
+    let values = {}
     try {
-        let settings = dataContainer.getAttribute("data-settings");
-        let searchSites = dataContainer.getAttribute("data-search-sites");
-        values['settings'] = JSON.parse(settings);
-        values['search_sites'] = JSON.parse(searchSites);
+        const settings = dataContainer.getAttribute('data-settings')
+        const searchSites = dataContainer.getAttribute('data-search-sites')
+        values.settings = JSON.parse(settings)
+        values.search_sites = JSON.parse(searchSites)
     } catch (e) {
         values = {}
-        console.log(e);
+        console.log(e)
     }
-    bar.provide('settings', values['settings']);
-    bar.mount("#" + "app-settings-content");
-    app.provide('settings', values);
-    let vm = app.mount('#' + container);
-    helper.addVue(vm.$options.name, vm);
 
-    eventHandler.add("click", "#start-aria2", "button", function (e) {
-        const path = basePath + "/aria2/start";
-        let element = e.target
-        if (element.classList.contains("notinstalled")) {
-            return;
+    bar.provide('settings', values.settings)
+    bar.mount('#app-settings-content')
+    app.provide('settings', values)
+    const vm = app.mount(`#${container}`)
+    helper.addVue(vm.$options.name, vm)
+
+    eventHandler.add('click', '#start-aria2', 'button', function (e) {
+        const path = `${basePath}/aria2/start`
+        const element = e.target
+        if (element.classList.contains('notinstalled')) {
+            return
         }
-        let parent = element.parentElement;
-        let oldHtml = parent.innerHTML;
-        parent.innerHTML = helper.loadingTpl();
-        let url = helper.generateUrl(path);
+
+        const parent = element.parentElement
+        const oldHtml = parent.innerHTML
+        parent.innerHTML = helper.loadingTpl()
+        const url = helper.generateUrl(path)
+
         const callback = function (parent, html, data) {
-            parent.innerHTML = html;
-
+            parent.innerHTML = html
             if (!data.status) {
-                if (data.error)
-                    helper.error(data.error);
-                return;
+                if (data.error) helper.error(data.error)
+                return
             }
-            let element = document.querySelector("#start-aria2 button");
-            let aria2 = element.getAttribute("data-aria2");
-            if (!aria2) {
-                return;
-            }
+
+            const button = document.querySelector('#start-aria2 button')
+            const aria2 = button.getAttribute('data-aria2')
+            if (!aria2) return
+
             if (aria2 === 'on') {
-                element.setAttribute("data-aria2", "off");
-                element.textContent = t("ncdownloader", "Start Aria2");
+                button.setAttribute('data-aria2', 'off')
+                button.textContent = t(APP_ID, 'Start Aria2')
             } else {
-                element.setAttribute("data-aria2", "on");
-                element.textContent = t("ncdownloader", "Stop Aria2");
+                button.setAttribute('data-aria2', 'on')
+                button.textContent = t(APP_ID, 'Stop Aria2')
             }
         }
+
         helper.httpClient(url).setHandler(function (data) {
-            callback(parent, oldHtml, data);
-        }).send();
+            callback(parent, oldHtml, data)
+        }).send()
     })
-    eventHandler.add("click", "#app-navigation", "#search-download", helper.showDownload);
-    delegate('#app-ncdownloader-wrapper',
-        { target: '[data-tippy-content]' }
-    );
-});
 
-
-
-
+    eventHandler.add('click', '#app-navigation', '#search-download', helper.showDownload)
+    delegate('#app-ncdownloader-wrapper', { target: '[data-tippy-content]' })
+})
