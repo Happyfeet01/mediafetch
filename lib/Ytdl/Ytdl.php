@@ -10,12 +10,11 @@ class Ytdl
 {
     public $audioOnly = 0;
     public $audioFormat = 'm4a', $videoFormat = null;
-    //path in nextcloud fs
     public $dbDlPath = null;
     private $format = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
     private $options = [];
     private $downloadDir;
-    private $timeout = 60 * 60 * 10; //10 hours
+    private $timeout = 60 * 60 * 10;
     private $outTpl = "%(title).32s.%(ext)s";
     private $defaultDir = "/tmp/downloads";
     private $env = [];
@@ -28,13 +27,14 @@ class Ytdl
         $options += ['downloadDir' => '/tmp/downloads', 'settings' => []];
         $this->init($options);
     }
+
     public function init(array $options)
     {
         extract($options);
         if (!empty($binary)) {
             $this->bin = $binary;
         } else {
-            $this->bin = __DIR__ . "/../../bin/yt-dlp"; //Helper::findBinaryPath('ytdl', __DIR__ . "/../../bin/yt-dlp");
+            $this->bin = __DIR__ . "/../../bin/yt-dlp";
         }
         if ($this->isInstalled() && !$this->isExecutable()) {
             chmod($this->bin, 0744);
@@ -60,6 +60,7 @@ class Ytdl
             $this->outTpl = $this->options[$index + 1];
             unset($this->options[$index]);
             unset($this->options[$index + 1]);
+            $this->options = array_values($this->options);
         }
     }
 
@@ -72,15 +73,10 @@ class Ytdl
     {
         if (Helper::ffmpegInstalled()) {
             $this->addOption('--prefer-ffmpeg');
-            // $this->addOption('--add-metadata');
-            // $this->setOption('--metadata-from-title', "%(artist)s-%(title).64s");
             $this->addOption('--extract-audio');
         } else {
             $this->audioFormat = "m4a";
         }
-        /*$pos = strrpos($this->outTpl, '.');
-        $this->outTpl = substr($this->outTpl, 0, $pos) . "." . $this->audioFormat;
-        $this->outTpl = "/%(id)s-%(title)s.m4a";*/
         $this->setAudioFormat($this->audioFormat);
         return $this;
     }
@@ -97,7 +93,6 @@ class Ytdl
 
     public function setVideoFormat($format)
     {
-        //$this->videoFormat = $format;
         $this->setOption('--recode-video', $format);
     }
 
@@ -115,7 +110,8 @@ class Ytdl
 
     public function setDownloadDir($dir)
     {
-        $this->downloadDir = rtrim($dir, '/');
+        $this->downloadDir = rtrim((string) $dir, '/');
+        return $this;
     }
 
     public function getDownloadDir()
@@ -140,32 +136,56 @@ class Ytdl
                 $this->setOption('--format', $this->format);
             }
         }
+
         $this->helper = YtdHelper::create();
-        $this->downloadDir = $this->downloadDir ?? $this->defaultDir;
+        $this->downloadDir = $this->downloadDir ?: $this->defaultDir;
         $this->setOption("--output", $this->downloadDir . "/" . $this->outTpl);
         $this->setUrl($url);
         $this->prependOption($this->bin);
-        $process = new Process($this->options, null, $this->env);
-        $process->setTimeout($this->timeout);
+
         $data = ['link' => $url, 'path' => $this->dbDlPath];
         if ($this->audioOnly) {
             $data['ext'] = $this->audioFormat;
         } else {
             $data['ext'] = $this->videoFormat;
         }
+        $this->helper->start($url, $data);
+
+        $process = new Process($this->options, null, $this->env);
+        $process->setTimeout($this->timeout);
         $process->run(function ($type, $buffer) use ($data, $process) {
             if (Process::ERR === $type) {
                 $this->onError($buffer);
             } else {
-                $data['pid'] = $process->getPid();
-                $this->onOutput($buffer, $data);
+                $extra = $data;
+                $extra['pid'] = $process->getPid();
+                $this->onOutput($buffer, $extra);
             }
         });
+
         if ($process->isSuccessful()) {
-            $this->helper->updateStatus(Helper::STATUS['COMPLETE']);
-            return ['message' => $this->helper->file ?? $process->getErrorOutput()];
+            $this->helper->updateAllStatus(Helper::STATUS['WAITING']);
+            return ['message' => $this->helper->file ?? 'Download finished'];
         }
-        return ['error' => $process->getErrorOutput()];
+
+        $this->helper->updateAllStatus(Helper::STATUS['ERROR']);
+        return ['error' => $process->getErrorOutput() ?: 'yt-dlp failed'];
+    }
+
+    public function markImported(array $imported): void
+    {
+        if (!$this->helper) {
+            return;
+        }
+        $this->helper->applyImportedNames($imported);
+        $this->helper->updateAllStatus(Helper::STATUS['COMPLETE']);
+    }
+
+    public function markImportFailed(): void
+    {
+        if ($this->helper) {
+            $this->helper->updateAllStatus(Helper::STATUS['ERROR']);
+        }
     }
 
     private function onError($buffer)
@@ -177,6 +197,7 @@ class Ytdl
     {
         $this->helper->run($buffer, $extra);
     }
+
     public function getDownloadUrl($url)
     {
         $this->setUrl($url);
@@ -194,15 +215,15 @@ class Ytdl
     public function setUrl($url)
     {
         $this->prependOption($url);
-        //$index = array_search('-i', $this->options);
-        //array_splice($this->options, $index + 1, 0, $url);
     }
+
     public function setOption($key, $value, $hyphens = false)
     {
         $this->addOption($key, $hyphens);
         $this->addOption($value, false);
         return $this;
     }
+
     public function addOption(String $option, $hyphens = false)
     {
         if ($hyphens && substr($option, 0, 2) !== '--') {
@@ -213,7 +234,7 @@ class Ytdl
 
     protected function hasOption($name)
     {
-        return array_search($name, $this->options);
+        return array_search($name, $this->options, true);
     }
 
     public function forceIPV4()
@@ -224,16 +245,17 @@ class Ytdl
 
     private function buildCMD()
     {
-        $this->cmd = $this->bin; //. " 2>&1";
-
+        $this->cmd = $this->bin;
         foreach ($this->options as $option) {
-            $this->cmd .= " " . $option;
+            $this->cmd .= " " . escapeshellarg((string) $option);
         }
     }
+
     public function isInstalled()
     {
         return @is_file($this->bin);
     }
+
     public function isExecutable()
     {
         return @is_executable($this->bin);
@@ -248,6 +270,7 @@ class Ytdl
     {
         return $this->bin;
     }
+
     public function install()
     {
         $url = $this->installUrl();
@@ -271,11 +294,11 @@ class Ytdl
         $process = new Process([$this->bin, '--version']);
         $process->run();
         if ($process->isSuccessful()) {
-            //remove any new line
             return trim($process->getOutput());
         }
         return false;
     }
+
     public function check()
     {
         if ($tagName = Helper::getLatestRelease('yt-dlp', 'yt-dlp')) {
@@ -287,6 +310,7 @@ class Ytdl
         }
         return ['status' => false, 'message' => 'No update available'];
     }
+
     public function update()
     {
         $file = __DIR__ . "/../../bin/yt-dlp";
