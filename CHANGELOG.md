@@ -2,7 +2,7 @@
 
 All notable changes to MediaFetch will be documented in this file.
 
-## [1.0.0-beta.1] - Unreleased
+## [1.0.0] - 2026-08-26
 
 ### Added
 
@@ -12,6 +12,7 @@ All notable changes to MediaFetch will be documented in this file.
 - Added GitHub Actions checks for PHP syntax, app metadata and frontend builds.
 - Added support for administrator-managed downloader wrapper binaries, including VPN wrapper setups.
 - Added safe per-user allowlists for aria2 and yt-dlp options.
+- Added a Nextcloud 34 compatible mobile navigation drawer.
 
 ### Changed
 
@@ -20,11 +21,13 @@ All notable changes to MediaFetch will be documented in this file.
 - Updated Nextcloud frontend libraries for current Nextcloud releases.
 - Renamed user-facing youtube-dl references to yt-dlp where applicable.
 - Restricted the supported Nextcloud range to currently maintained releases (32–34) for the first MediaFetch release.
+- Updated bundled PHP dependencies for PHP 8.2–8.4 and Nextcloud 34 compatibility.
 
 ### Migration
 
 - Existing NCDownloader app and user settings are read through a legacy fallback and copied to the `mediafetch` configuration namespace when accessed.
 - Existing per-user download folders, torrent folders, aria2 settings and yt-dlp settings remain available after migration.
+- Existing NCDownloader download records are imported into the MediaFetch download table without deleting the legacy table during the first release.
 
 ### Security
 
@@ -33,10 +36,7 @@ All notable changes to MediaFetch will be documented in this file.
 - Removed unsafe filesystem, credential and RPC-related options from personal aria2 settings.
 - Restricted personal yt-dlp output templates to filenames so users cannot escape the configured download directory.
 
-### Pending before 1.0.0
+### Tested
 
-- Full runtime test on Nextcloud 34.
-- Remaining public-API/deprecation audit.
-- App package and signing workflow.
-- Nextcloud App Store certificate and release credentials.
-- Final screenshots, translations and App Store metadata.
+- Runtime tested successfully on Nextcloud 34.0.2 with PHP 8.4.
+- Main app view, mobile navigation, admin settings, personal settings, aria2 and yt-dlp workflows verified on the target installation.
