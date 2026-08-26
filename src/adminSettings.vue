@@ -9,7 +9,7 @@
     </toggleButton>
   </div>
   <customOptions name="admin-aria2-settings" @mounted="render" title="Global Aria2 Settings"
-    path="/apps/ncdownloader/admin/aria2/save" :validOptions="validOptions">
+    path="/apps/mediafetch/admin/aria2/save" :validOptions="validOptions">
     <template #save>Save Settings</template>
   </customOptions>
   <systemInfo :aria2Version="aria2Version" :ytdVersion="ytdVersion" />
@@ -44,8 +44,7 @@ export default {
     toggle(name, value) {
       let data = {};
       data[name] = value ? 1 : 0;
-      let path = "/apps/ncdownloader/admin/save";
-      const url = helper.generateUrl(path);
+      const url = helper.generateUrl("/apps/mediafetch/admin/save");
       helper
         .httpClient(url)
         .setData(data)
@@ -58,7 +57,7 @@ export default {
     },
     render(event, $vm) {
       helper
-        .httpClient(helper.generateUrl("/apps/ncdownloader/admin/aria2/get"))
+        .httpClient(helper.generateUrl("/apps/mediafetch/admin/aria2/get"))
         .setMethod("GET")
         .setHandler((data) => {
           if (!data) {
@@ -69,7 +68,6 @@ export default {
             if (aria2Options.includes(key))
               input.push({ name: key, value: data[key], id: key });
           }
-          //settingsForm.getInstance($vm.container).render(input);
           $vm.options = input;
         })
         .send();
@@ -95,6 +93,5 @@ export default {
       helper.error(e);
     }
   },
-
 };
 </script>
