@@ -16,7 +16,7 @@
 <script>
 import customOptions from "./components/customOptions";
 import helper from "./utils/helper";
-import aria2Options from "./utils/aria2Options";
+import safeAria2Options from "./utils/safeAria2Options";
 import safeYtdlOptions from "./utils/safeYtdlOptions";
 import settingsRow from "./components/settingsRow";
 
@@ -25,7 +25,7 @@ export default {
   data() {
     return {
       options: [],
-      aria2Options: aria2Options,
+      aria2Options: safeAria2Options,
       ytdlOptions: safeYtdlOptions,
       disallowAria2Settings: false,
       isAdmin: false,
@@ -45,7 +45,7 @@ export default {
           }
           let input = [];
           for (let key in data) {
-            if (aria2Options.includes(key))
+            if (safeAria2Options.includes(key))
               input.push({ name: key, value: data[key], id: key });
           }
           $vm.options = input;
