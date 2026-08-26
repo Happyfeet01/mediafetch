@@ -70,8 +70,9 @@ export default {
           formData["extension"] = formData["select-value-extension"];
         }
         message = helper.t("Download task started!");
-        helper.pollingYtdl();
         helper.setContentTableType("ytdl-downloads");
+        contentTable.getInstance().loading();
+        helper.pollingYtdl();
       } else {
         helper.polling();
         helper.setContentTableType("active-downloads");
