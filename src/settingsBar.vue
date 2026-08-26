@@ -35,46 +35,46 @@
 <script>
 import toggleButton from "./components/toggleButton";
 import helper from "./utils/helper";
-import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import Http from "./lib/http";
-const basePath = "/apps/ncdownloader";
+import { translate as t } from "@nextcloud/l10n";
+
+const APP_ID = "mediafetch";
+const basePath = `/apps/${APP_ID}`;
 
 export default {
   name: "settingsBar",
   inject: ["settings"],
   data() {
-    let personal = {
-      title: t("ncdownloader", "Personal Settings"),
+    const personal = {
+      title: t(APP_ID, "Personal Settings"),
       url: this.settings.personal_url,
     };
-    let admin = {
-      title: t("ncdownloader", "Admin Settings"),
+    const admin = {
+      title: t(APP_ID, "Admin Settings"),
       url: this.settings.admin_url,
     };
     return {
-      personal: personal,
-      admin: admin,
+      personal,
+      admin,
       isAdmin: this.settings.is_admin,
-      sectionName: t("ncdownloader", "Settings"),
-      errorText: t("ncdownloader", "Hide Errors"),
+      sectionName: t(APP_ID, "Settings"),
+      errorText: t(APP_ID, "Hide Errors"),
       toggleStatus: helper.str2Boolean(this.settings.ncd_hide_errors),
       btStatus: helper.str2Boolean(this.settings.ncd_disable_bt),
-      errorTooltip: t("ncdownloader", "Enable this to hide errors"),
-      btTooltip: t("ncdownload", "Disable BT for non-admin users"),
+      errorTooltip: t(APP_ID, "Enable this to hide errors"),
+      btTooltip: t(APP_ID, "Disable BT for non-admin users"),
     };
   },
-  created() {},
   methods: {
     toggle(name, value) {
-      let data = {};
+      const data = {};
       data[name] = value ? 1 : 0;
-      let path = (name == "ncd_disable_bt") ? "/admin/save" : "/personal/save";
+      const path = name === "ncd_disable_bt" ? "/admin/save" : "/personal/save";
       const url = helper.generateUrl(basePath + path);
       helper.httpClient(url)
         .setData(data)
         .setHandler((resp) => {
           if (resp["message"]) {
-            helper.message(t("ncdownloader", resp["message"]), 1000);
+            helper.message(t(APP_ID, resp["message"]), 1000);
           }
         })
         .send();
@@ -83,7 +83,6 @@ export default {
   components: {
     toggleButton,
   },
-  mounted() {},
 };
 </script>
 
