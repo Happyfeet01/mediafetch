@@ -1,0 +1,55 @@
+name: MediaFetch CI
+
+on:
+  push:
+    branches:
+      - master
+      - mediafetch-rebrand
+      - nextcloud-34-store-release
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: PHP checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate Composer metadata
+        run: composer validate --no-check-publish
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHP syntax check
+        run: find appinfo lib templates -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Validate appinfo XML
+        run: php -r '$xml = simplexml_load_file("appinfo/info.xml"); if ($xml === false) { exit(1); } if ((string)$xml->id !== "mediafetch") { fwrite(STDERR, "Unexpected app id\n"); exit(1); }'
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build frontend
+        run: npm run build
