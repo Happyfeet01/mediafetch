@@ -1,0 +1,22 @@
+# MediaFetch 1.0.0 release TODO
+
+- [x] Choose public name and app ID (`MediaFetch` / `mediafetch`)
+- [x] Add Nextcloud 34 compatibility metadata
+- [x] Keep separate admin and personal settings
+- [x] Preserve legacy NCDownloader settings through fallback migration
+- [x] Rebrand primary routes and frontend translation domain
+- [x] Add modern Nextcloud folder picker
+- [x] Add safe personal yt-dlp option allowlist
+- [x] Add safe personal aria2 option allowlist
+- [x] Remove user-configurable shell VPN commands
+- [x] Add CI for PHP syntax, metadata and frontend build
+- [ ] Run complete functional test on Nextcloud 34
+- [ ] Audit remaining legacy/internal Nextcloud APIs
+- [ ] Replace remaining user-facing NCDownloader/youtube-dl strings
+- [ ] Regenerate/verify translation catalogs
+- [ ] Generate App Store screenshots and final app icon assets
+- [ ] Finalize production packaging under top-level `mediafetch/`
+- [ ] Obtain Nextcloud app signing certificate for `mediafetch`
+- [ ] Configure protected App Store/release secrets
+- [ ] Add and test signed release automation
+- [ ] Publish `1.0.0` release and submit it to the Nextcloud App Store
