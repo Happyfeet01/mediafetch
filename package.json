@@ -1,26 +1,27 @@
 {
-  "name": "net-loader",
-  "description": "Standalone Nextcloud frontend for yt-dlp and aria2",
-  "version": "0.1.0",
-  "author": "Jiaxin Huang <freefallbenson@gmail.com>",
+  "name": "mediafetch",
+  "description": "MediaFetch - a Nextcloud download manager for aria2 and yt-dlp",
+  "version": "1.0.0-beta.1",
+  "author": "Happyfeet01",
   "contributors": [
     "Jiaxin Huang <freefallbenson@gmail.com>"
   ],
   "keywords": [
     "nextcloud",
-    "net-loader",
-    "app",
-    "dev"
+    "mediafetch",
+    "aria2",
+    "yt-dlp",
+    "download-manager"
   ],
   "bugs": {
-    "url": "https://github.com/net-loader/net-loader/issues"
+    "url": "https://github.com/Happyfeet01/ncdownloader/issues"
   },
   "repository": {
-    "url": "https://github.com/net-loader/net-loader",
+    "url": "https://github.com/Happyfeet01/ncdownloader",
     "type": "git"
   },
-  "homepage": "https://github.com/net-loader/net-loader",
-  "license": "agpl",
+  "homepage": "https://github.com/Happyfeet01/ncdownloader",
+  "license": "AGPL-3.0-or-later",
   "private": true,
   "scripts": {
     "build": "NODE_ENV=production webpack --progress --config webpack.app.js",
@@ -38,8 +39,8 @@
     "vuex": "^4.0.2"
   },
   "engines": {
-    "node": ">=14.0.0",
-    "npm": ">=7.0.0"
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",
