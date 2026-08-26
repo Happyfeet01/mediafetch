@@ -5,7 +5,6 @@ namespace OCA\NCDownloader\Controller;
 use OCA\NCDownloader\Aria2\Aria2;
 use OCA\NCDownloader\Tools\Counters;
 use OCA\NCDownloader\Db\Helper as DbHelper;
-use OCA\NCDownloader\Tools\folderScan;
 use OCA\NCDownloader\Tools\Helper;
 use OCA\NCDownloader\Ytdl\Ytdl;
 use OCP\AppFramework\Controller;
@@ -214,16 +213,6 @@ class MainController extends Controller
             'result' => $result['gid'],
             'file' => $result['filename'] ?? 'unknown',
         ]);
-    }
-
-    /**
-     * @NoAdminRequired
-     */
-    public function scanFolder()
-    {
-        $force = $this->request->getParam('force') ?? false;
-        $resp = $force ? folderScan::create()->scan() : folderScan::sync();
-        return new JSONResponse($resp);
     }
 
     /**
