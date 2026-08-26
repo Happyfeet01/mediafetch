@@ -13,6 +13,7 @@ All notable changes to MediaFetch will be documented in this file.
 - Added support for administrator-managed downloader wrapper binaries, including VPN wrapper setups.
 - Added safe per-user allowlists for aria2 and yt-dlp options.
 - Added a Nextcloud 34 compatible mobile navigation drawer.
+- Added visible yt-dlp lifecycle states for preparing, downloading, importing and completed downloads.
 
 ### Changed
 
@@ -22,6 +23,8 @@ All notable changes to MediaFetch will be documented in this file.
 - Renamed user-facing youtube-dl references to yt-dlp where applicable.
 - Restricted the supported Nextcloud range to currently maintained releases (32–34) for the first MediaFetch release.
 - Updated bundled PHP dependencies for PHP 8.2–8.4 and Nextcloud 34 compatibility.
+- yt-dlp now downloads into a private temporary workspace and imports completed files through Nextcloud's public Files API.
+- Removed the old forced folder scan after yt-dlp downloads and before opening the destination folder.
 
 ### Migration
 
@@ -35,6 +38,7 @@ All notable changes to MediaFetch will be documented in this file.
 - Removed arbitrary command-execution options from personal yt-dlp settings.
 - Removed unsafe filesystem, credential and RPC-related options from personal aria2 settings.
 - Restricted personal yt-dlp output templates to filenames so users cannot escape the configured download directory.
+- Removed the legacy direct use of Nextcloud's internal file scanner from the download workflow.
 
 ### Tested
 
