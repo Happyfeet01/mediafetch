@@ -27,11 +27,26 @@ class Admin implements ISettings
 
     public function getForm()
     {
+        $aria2Version = null;
+        $ytdlVersion = null;
+
+        try {
+            $aria2Version = Helper::getAria2Version();
+        } catch (\Throwable $e) {
+            Helper::debug('Unable to read aria2 version: ' . $e->getMessage());
+        }
+
+        try {
+            $ytdlVersion = Helper::getYtdlVersion();
+        } catch (\Throwable $e) {
+            Helper::debug('Unable to read yt-dlp version: ' . $e->getMessage());
+        }
+
         $settings = Helper::getAllAdminSettings();
         $settings += [
             'path' => '/apps/mediafetch/admin/save',
-            'aria2_version' => Helper::getAria2Version(),
-            'ytdl_version' => Helper::getYtdlVersion(),
+            'aria2_version' => $aria2Version,
+            'ytdl_version' => $ytdlVersion,
         ];
 
         $parameters = [
