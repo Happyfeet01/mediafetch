@@ -243,6 +243,15 @@
     #ncdownloader-settings-form input[type=text] {
         width: 135px;
     }
+
+    // Nextcloud 34 keeps legacy #app-navigation mobile CSS but no longer
+    // provides the old Snap.js toggle behaviour. src/index.js toggles this
+    // class so the navigation drawer can slide back into view.
+    body.mediafetch-navigation-open #app-navigation:not(.vue) {
+        transform: translateX(0);
+        z-index: 1040;
+        box-shadow: 8px 0 24px rgba(0, 0, 0, 0.18);
+    }
 }
 
 @media only screen and (max-width: 1020px) {
