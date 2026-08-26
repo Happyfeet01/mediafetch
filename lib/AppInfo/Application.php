@@ -4,6 +4,7 @@ namespace OCA\NCDownloader\AppInfo;
 
 use OCA\NCDownloader\Aria2\Aria2;
 use OCA\NCDownloader\Db\Settings;
+use OCA\NCDownloader\Files\MediaImporter;
 use OCA\NCDownloader\Http\Client;
 use OCA\NCDownloader\Tools\Helper;
 use OCA\NCDownloader\Ytdl\Ytdl;
@@ -12,6 +13,7 @@ use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DomCrawler\Crawler;
@@ -33,6 +35,10 @@ class Application extends App implements IBootstrap
 
         $context->registerService(Crawler::class, function () {
             return new Crawler();
+        });
+
+        $context->registerService(MediaImporter::class, function (ContainerInterface $container) {
+            return new MediaImporter($container->get(IRootFolder::class));
         });
 
         $sites = Helper::getSearchSites();
@@ -77,8 +83,6 @@ class Application extends App implements IBootstrap
                 $aria2Conf = [];
             }
 
-            // Supplying the hooks here prevents the legacy Aria2 class defaults
-            // from falling back to /apps/ncdownloader after the rebrand.
             $aria2Conf += [
                 'on-download-complete' => $appPath . '/hooks/completeHook.sh',
                 'on-download-start' => $appPath . '/hooks/startHook.sh',

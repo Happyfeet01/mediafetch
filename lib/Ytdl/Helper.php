@@ -15,18 +15,45 @@ class Helper
     protected $gid;
     protected $ytdl;
     protected $status;
+    protected $placeholderGid;
+    protected $jobToken;
+    protected $gids = [];
+
     public function __construct()
     {
         $this->dbconn = new DbHelper();
         $this->tablename = $this->dbconn->getTableName();
-        $this->user = \OC::$server->get(\OCP\IUserSession::class)->getUser()->getUID();
+        $user = \OC::$server->get(\OCP\IUserSession::class)->getUser();
+        $this->user = $user ? $user->getUID() : '';
     }
 
     public static function create()
     {
-
         return new static();
     }
+
+    public function start(string $url, array $extra): string
+    {
+        $this->jobToken = ToolsHelper::generateGID($url . '|' . microtime(true) . '|' . mt_rand());
+        $this->placeholderGid = $this->jobToken;
+        $this->gid = $this->placeholderGid;
+
+        $data = [
+            'uid' => $this->user,
+            'gid' => $this->placeholderGid,
+            'type' => ToolsHelper::DOWNLOADTYPE['YOUTUBE-DL'],
+            'filename' => 'Preparing download…',
+            'status' => ToolsHelper::STATUS['ACTIVE'],
+            'timestamp' => time(),
+            'speed' => 'Starting',
+            'progress' => '0%',
+            'data' => $this->serializeExtra($extra),
+        ];
+        $this->dbconn->insert($data);
+
+        return $this->placeholderGid;
+    }
+
     public function getDownloadInfo(string $output): ?array
     {
         $rules = '#\[(?<module>(download|ExtractAudio|VideoConvertor|Merger|ffmpeg))\]((\s+|\s+Converting.*;\s+)Destination:\s+|\s+Merging formats into\s+\")' .
@@ -50,18 +77,16 @@ class Helper
     public function getProgress(string $buffer): ?array
     {
         $progressRegex = '#\[download\]\s+' .
-        '(?<percentage>\d+(?:\.\d+)?%)' . //progress
+        '(?<percentage>\d+(?:\.\d+)?%)' .
         '\s+of\s+[~]?\s*' .
-        '(?<filesize>\d+(?:\.\d+)?(?:K|M|G)iB)' . //file size
+        '(?<filesize>\d+(?:\.\d+)?(?:K|M|G)iB)' .
         '(?:\s+at\s+' .
-        '(?<speed>(\d+(?:\.\d+)?(?:K|M|G)iB/s)|Unknown speed))' . //speed
-        '(?:\s+ETA\s+(?<eta>([\d:]{2,8}|Unknown ETA)))?' . //estimated download time
+        '(?<speed>(\d+(?:\.\d+)?(?:K|M|G)iB/s)|Unknown speed))' .
+        '(?:\s+ETA\s+(?<eta>([\d:]{2,8}|Unknown ETA)))?' .
         '(\s+in\s+(?<totalTime>[\d:]{2,8}))?#i';
 
-        if (preg_match_all($progressRegex, $buffer, $matches, PREG_SET_ORDER) !== false) {
-            if (count($matches) > 0) {
-                return reset($matches);
-            }
+        if (preg_match_all($progressRegex, $buffer, $matches, PREG_SET_ORDER) !== false && count($matches) > 0) {
+            return reset($matches);
         }
         return null;
     }
@@ -72,36 +97,80 @@ class Helper
         $sql = sprintf("UPDATE %s set filesize = ?,speed = ?,progress = ? WHERE gid = ?", $this->tablename);
         $this->dbconn->executeUpdate($sql, [$filesize, $speed, $percentage, $this->gid]);
     }
+
     public function log($message)
     {
         ToolsHelper::debug($message);
     }
+
     public function updateStatus($status = null)
     {
         if (isset($status)) {
-            $this->status = trim($status);
+            $this->status = trim((string) $status);
         }
-        $this->dbconn->updateStatus($this->gid, $this->status);
+        if ($this->gid) {
+            $this->dbconn->updateStatus($this->gid, $this->status);
+        }
     }
+
+    public function updateAllStatus(int $status): void
+    {
+        $this->status = $status;
+        $gids = $this->gids;
+        if ($gids === [] && $this->placeholderGid) {
+            $gids[] = $this->placeholderGid;
+        }
+        foreach (array_unique($gids) as $gid) {
+            $this->dbconn->updateStatus($gid, $status);
+        }
+    }
+
+    public function applyImportedNames(array $imported): void
+    {
+        if ($imported === []) {
+            return;
+        }
+
+        $names = [];
+        foreach ($imported as $item) {
+            if (isset($item['source'], $item['name'])) {
+                $names[basename((string) $item['source'])] = (string) $item['name'];
+            }
+        }
+
+        foreach ($this->gids as $gid) {
+            $row = $this->dbconn->getByGid($gid);
+            if (!$row || !isset($row['filename'])) {
+                continue;
+            }
+            $current = basename((string) $row['filename']);
+            if (isset($names[$current]) && $names[$current] !== $current) {
+                $this->dbconn->setFilename($gid, $names[$current]);
+            }
+        }
+    }
+
     public function setPid($pid)
     {
         $this->pid = $pid;
     }
+
     public function run(string $buffer, array $extra)
     {
         $info = $this->getSiteInfo($buffer);
         if (isset($info["id"])) {
-            $this->gid = ToolsHelper::generateGID($info["id"]);
+            $this->gid = ToolsHelper::generateGID($info["id"] . '|' . ($this->jobToken ?? 'mediafetch'));
         }
-        if (!$this->gid) {
-            $this->gid = ToolsHelper::generateGID($extra["link"]);
+        if (!$this->gid || $this->gid === $this->placeholderGid) {
+            $this->gid = ToolsHelper::generateGID($extra["link"] . '|' . ($this->jobToken ?? microtime(true)));
         }
+
         $downloadInfo = $this->getDownloadInfo($buffer);
         if ($downloadInfo) {
             $file = $downloadInfo["filename"];
             $module = $downloadInfo["module"];
             $this->file = basename($file);
-            if (strtolower($module) == "download") {
+            if (strtolower($module) === "download") {
                 $this->save($file, $extra);
             } else {
                 $this->updateFilename($file);
@@ -111,15 +180,9 @@ class Helper
             $this->updateProgress($progress);
         }
     }
+
     protected function save(string $file, array $extra)
     {
-        $data = [];
-        $extra = serialize($extra);
-        if ($this->dbconn->getDBType() == "pgsql") {
-            if (function_exists("pg_escape_bytea")) {
-                $extra = pg_escape_bytea($extra);
-            }
-        }
         $data = [
             'uid' => $this->user,
             'gid' => $this->gid,
@@ -127,13 +190,31 @@ class Helper
             'filename' => basename($file),
             'status' => ToolsHelper::STATUS['ACTIVE'],
             'timestamp' => time(),
-            'data' => $extra,
+            'data' => $this->serializeExtra($extra),
         ];
-        $this->dbconn->insert($data);
+
+        $inserted = $this->dbconn->insert($data);
+        if ($inserted && !in_array($this->gid, $this->gids, true)) {
+            $this->gids[] = $this->gid;
+        }
+
+        if ($this->placeholderGid && $this->placeholderGid !== $this->gid) {
+            $this->dbconn->deleteByGid($this->placeholderGid);
+            $this->placeholderGid = null;
+        }
     }
+
     private function updateFilename(string $file)
     {
-        $sql = sprintf("UPDATE %s set filename = ? WHERE gid = ?", $this->tablename);
-        $this->dbconn->executeUpdate($sql, [basename($file), $this->gid]);
+        $this->dbconn->setFilename($this->gid, basename($file));
+    }
+
+    private function serializeExtra(array $extra)
+    {
+        $serialized = serialize($extra);
+        if ($this->dbconn->getDBType() === "pgsql" && function_exists("pg_escape_bytea")) {
+            return pg_escape_bytea($serialized);
+        }
+        return $serialized;
     }
 }

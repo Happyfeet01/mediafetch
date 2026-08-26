@@ -7,7 +7,6 @@ export default {
             event.stopPropagation();
             event.preventDefault();
             let element = event.target;
-            //helper.hideDownload();
             let currentType = helper.getContentTableType();
             let path = element.getAttribute("path");
             let name = element.getAttribute("id");
@@ -30,11 +29,8 @@ export default {
         eventHandler.add("click", "#ncdownloader-table-wrapper", ".download-file-folder", function (event) {
             event.stopPropagation();
             event.preventDefault();
-            let ele = event.target;
-            let url = ele.getAttribute("href");
-            helper.scanFolder().then(() => {
-                helper.redirect(url);
-            });
+            const url = event.target.getAttribute("href");
+            helper.redirect(url);
         });
     }
 }
