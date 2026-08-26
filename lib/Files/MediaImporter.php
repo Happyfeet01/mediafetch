@@ -80,9 +80,10 @@ final class MediaImporter
                 fclose($stream);
             }
 
-            if (!@unlink($source)) {
-                throw new RuntimeException(sprintf('Imported "%s", but could not remove its temporary copy.', $sourceName));
-            }
+            // The Nextcloud file is already committed at this point. Failure to
+            // remove the temporary copy is cleanup-only and must not turn a
+            // successful import into a user-visible error.
+            @unlink($source);
 
             $relativeTarget = trim($targetPath, '/');
             if ($relativeDir !== '.') {
