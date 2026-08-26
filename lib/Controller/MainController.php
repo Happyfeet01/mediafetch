@@ -154,22 +154,9 @@ class MainController extends Controller
             $this->aria2->setFileName($filename);
         }
 
-        $vpnStart = Helper::getSettings('ncd_vpn_start');
-        $vpnStop = Helper::getSettings('ncd_vpn_stop');
-        if ($vpnStart) {
-            @exec($vpnStart);
-        }
-
         $result = $this->aria2->download($url);
         if (!$result) {
-            if ($vpnStop) {
-                @exec($vpnStop);
-            }
             return ['error' => 'Failed to download the file.'];
-        }
-
-        if ($vpnStop) {
-            @exec($vpnStop);
         }
 
         if (isset($result['error'])) {
