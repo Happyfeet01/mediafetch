@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 namespace OCA\NCDownloader\Migration;
 
@@ -9,34 +9,15 @@ use OCP\DB\ISchemaWrapper;
 use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
-/**
- * Auto-generated migration step: Please modify to your needs!
- */
 class Version00001date20210807 extends SimpleMigrationStep
 {
-
-    /**
-     * @param IOutput $output
-     * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
-     * @param array $options
-     */
-    public function preSchemaChange(IOutput $output, Closure $schemaClosure, array $options)
-    {
-    }
-
-    /**
-     * @param IOutput $output
-     * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
-     * @param array $options
-     * @return null|ISchemaWrapper
-     */
-    public function changeSchema(IOutput $output, Closure $schemaClosure, array $options)
+    public function changeSchema(IOutput $output, Closure $schemaClosure, array $options): ?ISchemaWrapper
     {
         /** @var ISchemaWrapper $schema */
         $schema = $schemaClosure();
 
-        if (!$schema->hasTable('ncdownloader_info')) {
-            $table = $schema->createTable('ncdownloader_info');
+        if (!$schema->hasTable('mediafetch_info')) {
+            $table = $schema->createTable('mediafetch_info');
             $table->addColumn('id', 'integer', [
                 'autoincrement' => true,
                 'notnull' => true,
@@ -58,7 +39,7 @@ class Version00001date20210807 extends SimpleMigrationStep
                 'notnull' => true,
                 'length' => 4,
                 'default' => 1,
-                'comment' => "Download Type(Aria2 = 1,Youtube = 2,Others = 3)",
+                'comment' => 'Download Type(Aria2 = 1, yt-dlp = 2, Others = 3)',
             ]);
             $table->addColumn('status', 'smallint', [
                 'notnull' => true,
@@ -68,7 +49,7 @@ class Version00001date20210807 extends SimpleMigrationStep
             $table->addColumn('followedby', 'string', [
                 'notnull' => true,
                 'length' => 16,
-                'default' => 0,
+                'default' => '0',
             ]);
             $table->addColumn('timestamp', 'bigint', [
                 'notnull' => true,
@@ -81,15 +62,7 @@ class Version00001date20210807 extends SimpleMigrationStep
             ]);
             $table->setPrimaryKey(['id']);
         }
-        return $schema;
-    }
 
-    /**
-     * @param IOutput $output
-     * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`
-     * @param array $options
-     */
-    public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options)
-    {
+        return $schema;
     }
 }
