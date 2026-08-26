@@ -58,6 +58,7 @@ export default {
       const formData = helper.getData(formWrapper);
       const inputValue = formData["text-input-value"].trim();
       let message;
+      let startYtdlPolling = false;
 
       if (!helper.isURL(inputValue) && !helper.isMagnetURI(inputValue)) {
         helper.error(t(APP_ID, inputValue + " is Invalid"));
@@ -72,7 +73,7 @@ export default {
         message = helper.t("Download task started!");
         helper.setContentTableType("ytdl-downloads");
         contentTable.getInstance().loading();
-        helper.pollingYtdl();
+        startYtdlPolling = true;
       } else {
         helper.polling();
         helper.setContentTableType("active-downloads");
@@ -90,6 +91,10 @@ export default {
           successCallback(data);
         })
         .send();
+
+      if (startYtdlPolling) {
+        window.setTimeout(() => helper.pollingYtdl(), 250);
+      }
     },
     search(event, vm) {
       const element = event.target;
