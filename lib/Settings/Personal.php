@@ -2,44 +2,45 @@
 
 namespace OCA\NCDownloader\Settings;
 
+use OCA\NCDownloader\Db\Settings;
+use OCA\NCDownloader\Tools\Helper;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\IConfig;
 use OCP\IDBConnection;
+use OCP\IGroupManager;
+use OCP\IUserSession;
 use OCP\Settings\ISettings;
-use OCA\NCDownloader\Db\Settings;
-use OCA\NCDownloader\Tools\Helper;
-use OCP\IUserManager;
 
 class Personal implements ISettings
 {
     private $connection;
     private $timeFactory;
     private $config;
-    private $userManager;
     private $uid;
+    private $isAdmin;
     private $settings;
 
     public function __construct(
         IDBConnection $connection,
         ITimeFactory $timeFactory,
         IConfig $config,
-        IUserManager $userManager
+        IUserSession $userSession,
+        IGroupManager $groupManager
     ) {
         $this->connection = $connection;
         $this->timeFactory = $timeFactory;
         $this->config = $config;
-        $this->userManager = $userManager;
-        $this->uid = \OC::$server->get(\OCP\IUserSession::class)->getUser()->getUID();
+
+        $user = $userSession->getUser();
+        $this->uid = $user ? $user->getUID() : '';
+        $this->isAdmin = $this->uid !== '' && $groupManager->isAdmin($this->uid);
         $this->settings = new Settings($this->uid);
     }
 
     public function getForm()
     {
         $path = '/apps/mediafetch/personal/save';
-        $user = $this->userManager->get($this->uid);
-        $groupManager = \OC::$server->get(\OCP\IGroupManager::class);
-        $isAdmin = ($user !== null) ? $groupManager->isInGroup($user->getUID(), 'admin') : false;
 
         $parameters = [
             'settings' => [
@@ -50,7 +51,7 @@ class Personal implements ISettings
                 'ncd_seed_time' => $this->settings->get('ncd_seed_time'),
                 'path' => $path,
                 'disallow_aria2_settings' => Helper::getAdminSettings('disallow_aria2_settings'),
-                'is_admin' => $isAdmin,
+                'is_admin' => $this->isAdmin,
             ],
             'options' => [
                 [
