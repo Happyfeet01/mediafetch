@@ -55,7 +55,7 @@ class Personal implements ISettings
             ],
             'options' => [
                 [
-                    'label' => 'Downloads Folder ',
+                    'label' => 'Downloads Folder',
                     'id' => 'ncd_downloader_dir',
                     'value' => Helper::getDownloadDir(),
                     'placeholder' => Helper::getDownloadDir() ?? '/downloads',
@@ -66,20 +66,6 @@ class Personal implements ISettings
                     'id' => 'ncd_torrents_dir',
                     'value' => $this->settings->get('ncd_torrents_dir'),
                     'placeholder' => $this->settings->get('ncd_torrents_dir') ?? '/torrents',
-                    'path' => $path,
-                ],
-                [
-                    'label' => 'VPN start command',
-                    'id' => 'ncd_vpn_start',
-                    'value' => $this->settings->get('ncd_vpn_start'),
-                    'placeholder' => '/usr/bin/wg-quick up wg0',
-                    'path' => $path,
-                ],
-                [
-                    'label' => 'VPN stop command',
-                    'id' => 'ncd_vpn_stop',
-                    'value' => $this->settings->get('ncd_vpn_stop'),
-                    'placeholder' => '/usr/bin/wg-quick down wg0',
                     'path' => $path,
                 ],
                 [
