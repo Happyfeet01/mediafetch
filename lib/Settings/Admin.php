@@ -7,65 +7,63 @@ use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\Settings\ISettings;
-use OCA\NCDownloader\Db\Settings;
 use OCA\NCDownloader\Tools\Helper;
-
 
 class Admin implements ISettings
 {
+    private $connection;
+    private $timeFactory;
+    private $config;
 
-	/** @var IDBConnection */
-	private $connection;
-	/** @var ITimeFactory */
-	private $timeFactory;
-	/** @var IConfig */
-	private $config;
+    public function __construct(
+        IDBConnection $connection,
+        ITimeFactory $timeFactory,
+        IConfig $config
+    ) {
+        $this->connection = $connection;
+        $this->timeFactory = $timeFactory;
+        $this->config = $config;
+    }
 
-	public function __construct(
-		IDBConnection $connection,
-		ITimeFactory $timeFactory,
-		IConfig $config
-	) {
-		$this->connection = $connection;
-		$this->timeFactory = $timeFactory;
-		$this->config = $config;
-	}
+    public function getForm()
+    {
+        $aria2Version = null;
+        $ytdlVersion = null;
 
-	/**
-	 * @return TemplateResponse
-	 */
-	public function getForm()
-	{
-		$settings = Helper::getAllAdminSettings();
-		$settings +=  [
-			"path" => "/apps/ncdownloader/admin/save",
-			"aria2_version" => Helper::getAria2Version(),
-			"ytdl_version" => Helper::getYtdlVersion(),
-		];
-		$parameters = [
-			'settings' => $settings,
-			'options' => Helper::getAdminOptions($settings),
-		];
-		return new TemplateResponse('ncdownloader', 'settings/Admin', $parameters, '');
-	}
+        try {
+            $aria2Version = Helper::getAria2Version();
+        } catch (\Throwable $e) {
+            Helper::debug('Unable to read aria2 version: ' . $e->getMessage());
+        }
 
-	/**
-	 * @return string the section ID, e.g. 'sharing'
-	 */
-	public function getSection(): string
-	{
-		return 'ncdownloader';
-	}
+        try {
+            $ytdlVersion = Helper::getYtdlVersion();
+        } catch (\Throwable $e) {
+            Helper::debug('Unable to read yt-dlp version: ' . $e->getMessage());
+        }
 
-	/**
-	 * @return int whether the form should be rather on the top or bottom of
-	 * the admin section. The forms are arranged in ascending order of the
-	 * priority values. It is required to return a value between 0 and 100.
-	 *
-	 * E.g.: 70
-	 */
-	public function getPriority(): int
-	{
-		return 0;
-	}
+        $settings = Helper::getAllAdminSettings();
+        $settings += [
+            'path' => '/apps/mediafetch/admin/save',
+            'aria2_version' => $aria2Version,
+            'ytdl_version' => $ytdlVersion,
+        ];
+
+        $parameters = [
+            'settings' => $settings,
+            'options' => Helper::getAdminOptions($settings),
+        ];
+
+        return new TemplateResponse('mediafetch', 'settings/Admin', $parameters, '');
+    }
+
+    public function getSection(): string
+    {
+        return 'mediafetch';
+    }
+
+    public function getPriority(): int
+    {
+        return 0;
+    }
 }

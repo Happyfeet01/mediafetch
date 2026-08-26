@@ -1,8 +1,7 @@
 <?php
-script("ncdownloader", 'appSettings');
-style("ncdownloader", 'appSettings');
+script('mediafetch', 'appSettings');
+style('mediafetch', 'appSettings');
 extract($_);
-
 ?>
 <div class="ncdownloader-personal-settings" id="ncdownloader-personal-settings" data-settings='<?php print json_encode($settings); ?>' data-options='<?php print json_encode($options); ?>'>
 </div>

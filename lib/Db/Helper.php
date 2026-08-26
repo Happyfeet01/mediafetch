@@ -7,7 +7,7 @@ class Helper
 {
     //@var OC\DB\ConnectionAdapter
     private $conn;
-    private $table = "ncdownloader_info";
+    private $table = "mediafetch_info";
     private $prefixedTable;
     public function __construct()
     {

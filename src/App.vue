@@ -13,21 +13,22 @@
 import mainForm from "./components/mainForm";
 import toggleButton from "./components/toggleButton";
 import helper from "./utils/helper";
-import { translate as t, translatePlural as n } from "@nextcloud/l10n";
-import Http from "./lib/http";
+import { translate as t } from "@nextcloud/l10n";
 import contentTable from "./lib/contentTable";
 
-const successCallback = (data, element) => {
+const APP_ID = "mediafetch";
+
+const successCallback = (data) => {
   if (!data) {
-    helper.error(t("ncdownloader", "Something must have gone wrong!"));
+    helper.error(t(APP_ID, "Something must have gone wrong!"));
     return;
   }
   if (data.hasOwnProperty("error")) {
-    helper.error(t("ncdownloader", data.error));
+    helper.error(t(APP_ID, data.error));
   } else if (data.hasOwnProperty("message")) {
-    helper.message(t("ncdownloader", data.message));
+    helper.message(t(APP_ID, data.message));
   } else if (data.hasOwnProperty("file")) {
-    helper.message(t("ncdownloader", "Downloading" + " " + data.file));
+    helper.message(t(APP_ID, "Downloading" + " " + data.file));
   }
 };
 
@@ -43,28 +44,28 @@ export default {
     return {
       display: { download: true, search: false },
       uris: {
-        ytd_url: helper.generateUrl("/apps/ncdownloader/ytdl/new"),
-        aria2_url: helper.generateUrl("/apps/ncdownloader/new"),
-        search_url: helper.generateUrl("/apps/ncdownloader/search"),
-        upload_url: helper.generateUrl("/apps/ncdownloader/upload"),
+        ytd_url: helper.generateUrl("/apps/mediafetch/ytdl/new"),
+        aria2_url: helper.generateUrl("/apps/mediafetch/new"),
+        search_url: helper.generateUrl("/apps/mediafetch/search"),
+        upload_url: helper.generateUrl("/apps/mediafetch/upload"),
       },
     };
   },
-  created() {},
   methods: {
     download(event) {
-      let element = event.target;
-      let formWrapper = element.closest("form");
-      let formData = helper.getData(formWrapper);
-      let inputValue = formData["text-input-value"].trim();
+      const element = event.target;
+      const formWrapper = element.closest("form");
+      const formData = helper.getData(formWrapper);
+      const inputValue = formData["text-input-value"].trim();
       let message;
+
       if (!helper.isURL(inputValue) && !helper.isMagnetURI(inputValue)) {
-        helper.error(t("ncdownloader", inputValue + " is Invalid"));
+        helper.error(t(APP_ID, inputValue + " is Invalid"));
         return;
       }
+
       if (formData.type === "ytdl") {
         formData["extension"] = "";
-
         if (formData["select-value-extension"] !== "defaultext") {
           formData["extension"] = formData["select-value-extension"];
         }
@@ -75,41 +76,44 @@ export default {
         helper.polling();
         helper.setContentTableType("active-downloads");
       }
-      if (message) {
-        helper.info(message);
-      }
-      let url = formWrapper.getAttribute("action");
-      formData['url'] = formData["text-input-value"]
-      delete formData["text-input-value"]
+
+      if (message) helper.info(message);
+
+      const url = formWrapper.getAttribute("action");
+      formData.url = formData["text-input-value"];
+      delete formData["text-input-value"];
+
       helper.httpClient(url)
         .setData(formData)
-        .setHandler(function (data) {
-          successCallback(data, element);
+        .setHandler(function(data) {
+          successCallback(data);
         })
         .send();
     },
     search(event, vm) {
-      let element = event.target;
-      let formWrapper = element.closest("form");
-      let formData = helper.getData(formWrapper);
-      let inputValue = formData["text-input-value"];
-      if (!inputValue || (inputValue && inputValue.length < 2)) {
-        helper.error(t("ncdownloader", "Please enter valid keyword!"));
+      const element = event.target;
+      const formWrapper = element.closest("form");
+      const formData = helper.getData(formWrapper);
+      const inputValue = formData["text-input-value"];
+
+      if (!inputValue || inputValue.length < 2) {
+        helper.error(t(APP_ID, "Please enter valid keyword!"));
         vm.$data.loading = 0;
         return;
       }
+
       helper.disablePolling();
       contentTable.getInstance().loading();
 
-      let url = formWrapper.getAttribute("action");
-      formData['keyword'] = formData["text-input-value"]
-      formData['site'] = formData["select-value-search"]
-      delete formData["text-input-value"]
-      delete formData['select-value-search']
-      
+      const url = formWrapper.getAttribute("action");
+      formData.keyword = formData["text-input-value"];
+      formData.site = formData["select-value-search"];
+      delete formData["text-input-value"];
+      delete formData["select-value-search"];
+
       helper.httpClient(url)
         .setData(formData)
-        .setHandler(function (data) {
+        .setHandler(function(data) {
           if (data && data.title) {
             vm.$data.loading = 0;
             const tableInst = contentTable.getInstance(data.title, data.row);
@@ -124,26 +128,24 @@ export default {
         })
         .send();
     },
-    uploadFile(event, vm) {
-      let element = event.target;
+    uploadFile(event) {
+      const element = event.target;
       const files = element.files || event.dataTransfer.files;
-      if (files) {
-        let formWrapper = element.closest("form");
-        let url = formWrapper.getAttribute("action");
-        return helper.httpClient(url)
-          .setHandler(function (data) {
-            successCallback(data, element);
-          })
-          .upload(files[0]);
-      }
-      return false;
+      if (!files) return false;
+
+      const formWrapper = element.closest("form");
+      const url = formWrapper.getAttribute("action");
+      return helper.httpClient(url)
+        .setHandler(function(data) {
+          successCallback(data);
+        })
+        .upload(files[0]);
     },
   },
   components: {
     mainForm,
     toggleButton,
   },
-  mounted() {},
 };
 </script>
 

@@ -150,7 +150,7 @@ class Helper
             $msg = implode(",", $msg);
         }
         $logger = self::getLogger();
-        $logger->error($msg, ['app' => 'ncdownloader']);
+        $logger->error($msg, ['app' => 'mediafetch']);
     }
 
     public static function log($msg, $file = "/tmp/nc.log")
@@ -218,15 +218,19 @@ class Helper
         if (!function_exists($function_name)) {
             return false;
         }
-        $ini = \OC::$server->getIniWrapper();
-        $disabled = explode(',', $ini->get('disable_functions') ?: '');
+
+        // Nextcloud 34 no longer exposes OC\Server::getIniWrapper(). PHP's own
+        // ini_get() is sufficient here and keeps this helper independent from
+        // removed private Nextcloud server APIs.
+        $disabled = explode(',', (string) (ini_get('disable_functions') ?: ''));
         $disabled = array_map('trim', $disabled);
-        if (in_array($function_name, $disabled)) {
+        if (in_array($function_name, $disabled, true)) {
             return false;
         }
-        $disabled = explode(',', $ini->get('suhosin.executor.func.blacklist') ?: '');
+
+        $disabled = explode(',', (string) (ini_get('suhosin.executor.func.blacklist') ?: ''));
         $disabled = array_map('trim', $disabled);
-        if (in_array($function_name, $disabled)) {
+        if (in_array($function_name, $disabled, true)) {
             return false;
         }
         return true;
@@ -234,21 +238,13 @@ class Helper
 
     public static function findBinaryPath($program, $default = null)
     {
-        $memcache = \OC::$server->getMemCacheFactory()->createDistributed('findBinaryPath');
-        if ($memcache->hasKey($program)) {
-            return $memcache->get($program);
-        }
+        // getMemCacheFactory() was a private OC\Server convenience method and
+        // is gone in Nextcloud 34. Binary discovery is cheap enough to perform
+        // directly and avoids coupling MediaFetch to an internal cache API.
         $dataPath = \OC::$server->get(\OCP\IConfig::class)->getSystemValue('datadirectory');
         $paths = ['/usr/local/sbin', '/usr/local/bin', '/usr/sbin', '/usr/bin', '/sbin', '/bin', '/opt/bin', $dataPath . "/bin"];
-        $result = $default;
         $exeSniffer = new ExecutableFinder();
-        // Returns null if nothing is found
-        $result = $exeSniffer->find($program, $default, $paths);
-        if ($result) {
-            // store the value for 5 minutes
-            $memcache->set($program, $result, 300);
-        }
-        return $result;
+        return $exeSniffer->find($program, $default, $paths);
     }
 
     public static function formatInterval($interval, $granularity = 2)
@@ -383,19 +379,15 @@ class Helper
 
     public static function getSearchSites(): array
     {
-        $key = 'searchSites';
-        $memcache = \OC::$server->getMemCacheFactory()->createDistributed($key);
-        if ($memcache->hasKey($key)) {
-            $sites = $memcache->get($key);
-        } else {
-            try {
-                $sites = Helper::findSearchSites(__DIR__ . "/../Search/Sites/");
-                $memcache->set($key, $sites, 300);
-            } catch (\Exception $e) {
-                self::debug($e->getMessage());
-            }
+        // Nextcloud 34 removed OC\Server::getMemCacheFactory(). Search site
+        // discovery happens only for a handful of bundled classes, so avoiding
+        // the legacy distributed-cache shortcut is both simpler and safer.
+        try {
+            return self::findSearchSites(__DIR__ . "/../Search/Sites/");
+        } catch (\Throwable $e) {
+            self::debug('Failed to discover search sites: ' . $e->getMessage());
+            return [];
         }
-        return $sites;
     }
 
     public static function getMountPoints(): ?array
@@ -568,7 +560,7 @@ class Helper
 
     public static function getAppPath(): string
     {
-        return \OC::$server->get(\OCP\App\IAppManager::class)->getAppPath('ncdownloader');
+        return \OC::$server->get(\OCP\App\IAppManager::class)->getAppPath('mediafetch');
     }
     public static function folderUpdated(string $dir): bool
     {
@@ -662,10 +654,10 @@ class Helper
                 "path" => $data['path'],
             ],
             [
-                "label" => "Youtube-dl binary",
+                "label" => "yt-dlp binary",
                 "id" => "ncd_yt_binary",
                 "value" => $data['ncd_yt_binary'] ?? "",
-                "placeholder" => $data['ncd_yt_binary'] ?? "/usr/bin/youtube-dl",
+                "placeholder" => $data['ncd_yt_binary'] ?? "/usr/local/bin/yt-dlp",
                 "path" => $data['path'],
             ],
             [

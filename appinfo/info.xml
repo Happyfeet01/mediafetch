@@ -1,32 +1,34 @@
 <?xml version="1.0"?>
-<info xmlns:xsi= "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
-    <id>ncdownloader</id>
-    <name>Net loader</name>
-    <summary>Standalone download manager UI for Nextcloud</summary>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+    <id>mediafetch</id>
+    <name>MediaFetch</name>
+    <summary>Download manager for aria2 and yt-dlp</summary>
     <description>
-Search for torrents within the app from mutiple BT sites;
-Control Aria2 and manage download tasks from the web;
-download videos from 700+ video sites(youtube,youku,vimo,dailymotion,twitter,facebook and the likes
+MediaFetch is a download manager for Nextcloud that combines aria2 and yt-dlp in one web interface.
+
+Features include regular HTTP/HTTPS downloads, BitTorrent and magnet downloads through aria2, and media downloads through yt-dlp. Administrators keep control over global downloader settings while every user can configure their own download folders, aria2 options and yt-dlp options.
+
+MediaFetch is based on the original NCDownloader / Net loader project and continues its AGPL-licensed codebase.
     </description>
-    <version>0.1.0</version>
-    <licence>agpl</licence>
-    <author mail="freefallbenson@gmail.com" homepage="https://github.com/shiningw">jiaxinhuang</author>
+    <version>1.0.0</version>
+    <licence>AGPL-3.0-or-later</licence>
+    <author homepage="https://github.com/Happyfeet01">Happyfeet01</author>
+    <author homepage="https://github.com/shiningw">Jiaxin Huang</author>
     <namespace>NCDownloader</namespace>
+    <category>multimedia</category>
     <category>tools</category>
-    <website>https://github.com/net-loader/net-loader</website>
-    <bugs>https://github.com/net-loader/net-loader/issues</bugs>
-    <screenshot>https://user-images.githubusercontent.com/3911975/142444998-54dd54a6-0c8e-4d49-8188-270964a99c50.png</screenshot>
-    <screenshot>https://user-images.githubusercontent.com/3911975/142445020-27ec389a-5437-4d28-acc0-5e757fd6897d.png</screenshot>
-    <repository>https://github.com/net-loader/net-loader</repository>
+    <website>https://github.com/Happyfeet01/ncdownloader</website>
+    <bugs>https://github.com/Happyfeet01/ncdownloader/issues</bugs>
+    <repository>https://github.com/Happyfeet01/ncdownloader</repository>
     <dependencies>
-        <php min-version="8.1" max-version="8.4" />
-        <nextcloud min-version="28" max-version="33"/>
+        <php min-version="8.2" max-version="8.4" />
+        <nextcloud min-version="32" max-version="34" />
     </dependencies>
     <navigations>
         <navigation>
-            <name>Net loader</name>
-            <route>ncdownloader.Main.Index</route>
-            <icon>ncdownloader.svg</icon>
+            <name>MediaFetch</name>
+            <route>mediafetch.Main.Index</route>
+            <icon>mediafetch.svg</icon>
         </navigation>
     </navigations>
     <settings>
@@ -38,5 +40,4 @@ download videos from 700+ video sites(youtube,youku,vimo,dailymotion,twitter,fac
     <commands>
         <command>OCA\NCDownloader\Command\Aria2Command</command>
     </commands>
-
 </info>

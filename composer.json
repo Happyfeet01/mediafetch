@@ -1,7 +1,12 @@
 {
     "require": {
-        "symfony/dom-crawler": "^5.3",
-        "symfony/http-client": "^5.3",
-        "symfony/css-selector": "^5.3"
+        "php": ">=8.2",
+        "psr/log": "^3.0",
+        "symfony/css-selector": "^7.3",
+        "symfony/dom-crawler": "^7.3",
+        "symfony/http-client": "^7.3"
+    },
+    "config": {
+        "sort-packages": true
     }
 }

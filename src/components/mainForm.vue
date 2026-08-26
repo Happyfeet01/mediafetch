@@ -11,7 +11,7 @@
         class="ytdl-link option-buttons"
         @click.prevent="whichType('ytdl', $event)"
       >
-        Youtube-dl
+        yt-dlp
       </div>
       <div
         class="search-torrents option-buttons"
@@ -64,6 +64,8 @@ import uploadFile from "./uploadFile";
 import { translate as t } from "@nextcloud/l10n";
 import folderSettings from "./folderSettings.vue";
 
+const APP_ID = "mediafetch";
+
 export default {
   inject: ["settings", "search_sites"],
   data() {
@@ -74,8 +76,8 @@ export default {
       inputType: "download",
       checkboxes: false,
       downloadType: "aria2",
-      placeholder: t("ncdownloader", "Paste your http/magnet link here"),
-      searchLabel: t("ncdownloader", "Search Torrents"),
+      placeholder: t(APP_ID, "Paste your http/magnet link here"),
+      searchLabel: t(APP_ID, "Search Torrents"),
       searchOptions: this.search_sites ? this.search_sites : this.noOptions(),
       selectedExt: "defaultext",
     };
@@ -87,26 +89,25 @@ export default {
     uploadFile,
     folderSettings,
   },
-  created() {},
-  computed: {},
   methods: {
     whichType(type, event) {
-      let element = event.target;
-      let nodeList = document.querySelectorAll(".option-buttons");
+      const element = event.target;
+      const nodeList = document.querySelectorAll(".option-buttons");
       nodeList.forEach((node) => {
         node.classList.remove("active-button");
       });
       element.classList.toggle("active-button");
       this.downloadType = type;
       if (type === "aria2") {
+        this.placeholder = t(APP_ID, "Paste your http/magnet link here");
         this.path = this.uris.aria2_url;
       } else if (type === "ytdl") {
-        this.placeholder = t("ncdownloader", "Paste your video link here");
+        this.placeholder = t(APP_ID, "Paste your media link here");
         this.path = this.uris.ytd_url;
       } else {
         this.path = this.uris.search_url;
       }
-      this.checkboxes = type === "ytdl" ? true : false;
+      this.checkboxes = type === "ytdl";
       this.inputType = type === "search" ? "search" : "download";
     },
     download(event) {
@@ -119,17 +120,16 @@ export default {
       this.$emit("uploadfile", event, vm);
     },
     optionCallback(option) {
-      if (option.label.toLowerCase() == "music") {
-        this.searchLabel = t("ncdownloader", "Search Music");
+      if (option.label.toLowerCase() === "music") {
+        this.searchLabel = t(APP_ID, "Search Music");
       } else {
-        this.searchLabel = t("ncdownloader", "Search Torrents");
+        this.searchLabel = t(APP_ID, "Search Torrents");
       }
     },
     noOptions() {
       return [{ name: "nooptions", label: "No Options" }];
     },
   },
-  mounted() {},
   name: "mainForm",
   props: {
     uris: Object,

@@ -12,44 +12,70 @@
   </button>
 </template>
 <script>
+import { FilePickerClosed, getFilePickerBuilder } from "@nextcloud/dialogs";
+import "@nextcloud/dialogs/style.css";
 import { translate as t } from "@nextcloud/l10n";
 import helper from "../utils/helper";
+
+const APP_ID = "mediafetch";
 
 export default {
   name: "folderSettings",
   computed: {
     title() {
-      return t("ncdownloader", "Set Download Folder");
+      return t(APP_ID, "Set Download Folder");
     },
     buttonLabel() {
-      return t("ncdownloader", "Choose folder");
+      return t(APP_ID, "Choose folder");
     },
   },
   methods: {
+    async savePath(element, path) {
+      const currentPath = element.getAttribute("data-path") || "/";
+      if (currentPath === path) {
+        helper.info(t(APP_ID, "This folder is already selected"));
+        return;
+      }
+
+      const url = helper.generateUrl("/apps/mediafetch/personal/save");
+      helper
+        .httpClient(url)
+        .setData({ ncd_downloader_dir: path })
+        .setHandler((data) => {
+          if (data.status) {
+            element.setAttribute("data-path", path);
+            helper.info(t(APP_ID, "Download folder updated to {path}", { path }));
+          } else if (data.error) {
+            helper.error(data.error);
+          }
+        })
+        .send();
+    },
     handler(event) {
-      let element = event.currentTarget;
-      const cb = function (path) {
-        let dlPath = element.getAttribute("data-path");
-        if (dlPath == path) {
-          helper.info("Same folder,No need to update");
-          return;
+      const element = event.currentTarget;
+      const currentPath = element.getAttribute("data-path") || "/";
+
+      const picker = getFilePickerBuilder(t(APP_ID, "Choose download folder"))
+        .allowDirectories(true)
+        .setMimeTypeFilter([])
+        .setMultiSelect(false)
+        .startAt(currentPath)
+        .setButtonFactory((_selection, path) => [
+          {
+            label: t(APP_ID, "Use this folder"),
+            variant: "primary",
+            callback: async () => {
+              await this.savePath(element, path);
+            },
+          },
+        ])
+        .build();
+
+      picker.pick().catch((error) => {
+        if (!(error instanceof FilePickerClosed)) {
+          helper.error(error?.message || t(APP_ID, "Could not open folder picker"));
         }
-        let data = { ncd_downloader_dir: path };
-        let url = helper.generateUrl("/apps/ncdownloader/personal/save");
-        helper
-          .httpClient(url)
-          .setData(data)
-          .setHandler((data) => {
-            if (data.status) {
-              helper.info("Download folder updated to " + path);
-            }
-          })
-          .send();
-      };
-      let dlPath = element.hasAttribute("data-path")
-        ? element.getAttribute("data-path")
-        : undefined;
-      helper.filepicker(cb, dlPath);
+      });
     },
   },
   props: ["path"],

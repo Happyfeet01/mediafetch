@@ -8,32 +8,34 @@ use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\Settings\IIconSection;
 
-class AdminSection implements IIconSection {
+class AdminSection implements IIconSection
+{
+    private $l;
+    private $urlGenerator;
 
-	/** @var IL10N */
-	private $l;
+    public function __construct(IL10N $l, IURLGenerator $urlGenerator)
+    {
+        $this->l = $l;
+        $this->urlGenerator = $urlGenerator;
+    }
 
-	/** @var IURLGenerator */
-	private $urlGenerator;
+    public function getIcon(): string
+    {
+        return $this->urlGenerator->imagePath('mediafetch', 'mediafetch.svg');
+    }
 
-	public function __construct(IL10N $l, IURLGenerator $urlGenerator) {
-		$this->l = $l;
-		$this->urlGenerator = $urlGenerator;
-	}
+    public function getID(): string
+    {
+        return 'mediafetch';
+    }
 
-	public function getIcon(): string {
-		return $this->urlGenerator->imagePath('core', 'actions/settings-dark.svg');
-	}
+    public function getName(): string
+    {
+        return $this->l->t('MediaFetch');
+    }
 
-	public function getID(): string {
-		return 'ncdownloader';
-	}
-
-	public function getName(): string {
-		return $this->l->t('Net loader Settings');
-	}
-
-	public function getPriority(): int {
-		return 100;
-	}
+    public function getPriority(): int
+    {
+        return 100;
+    }
 }
