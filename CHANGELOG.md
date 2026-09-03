@@ -4,8 +4,18 @@ All notable changes to MediaFetch will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-09-03
+
+### Changed
+
+- yt-dlp downloads are now imported through Nextcloud's Files API instead of relying on internal file scanning.
+- Added visible preparing, downloading, importing and completed states for yt-dlp jobs.
+- Updated project links to point to the MediaFetch repository and issue tracker.
+
 ### Fixed
 
+- Fixed yt-dlp jobs appearing inactive immediately after submitting a download.
+- Avoided false import errors while cleaning up temporary yt-dlp workspaces.
 - Made completed HTTP, magnet and torrent downloads appear in Nextcloud without requiring a manual `occ files:scan`.
 - Corrected the aria2 hook argument order (`GID`, file count, file path) and preserved paths containing spaces.
 - Added a BitTorrent completion hook so multi-file torrents are scanned before seeding begins.
