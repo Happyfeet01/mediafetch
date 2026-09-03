@@ -4,7 +4,6 @@ namespace OCA\NCDownloader\Controller;
 use OCA\NCDownloader\Aria2\Aria2;
 use OCA\NCDownloader\Tools\Counters;
 use OCA\NCDownloader\Db\Helper as DbHelper;
-use OCA\NCDownloader\Tools\folderScan;
 use OCA\NCDownloader\Tools\Helper;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
@@ -137,7 +136,6 @@ class Aria2Controller extends Controller
     {
         //$path = $this->request->getRequestUri();
         $counter = $this->counters->getCounters();
-        folderScan::sync();
         switch (strtolower($path)) {
             case "active":
                 $resp = $this->aria2->tellActive();

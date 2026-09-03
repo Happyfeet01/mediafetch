@@ -2,6 +2,7 @@
 namespace OCA\NCDownloader\Db;
 use OCA\NCDownloader\Tools\Helper as ToolsHelper;
 use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
 
 class Helper
 {
@@ -9,9 +10,9 @@ class Helper
     private $conn;
     private $table = "mediafetch_info";
     private $prefixedTable;
-    public function __construct()
+    public function __construct(?IDBConnection $connection = null)
     {
-        $this->conn = \OC::$server->get(\OCP\IDBConnection::class);
+        $this->conn = $connection ?? \OC::$server->get(IDBConnection::class);
         $this->prefixedTable = $this->conn->getQueryBuilder()->getTableName($this->table);
     }
 
@@ -43,6 +44,18 @@ class Helper
             ->from($this->table)
             ->where('uid = :uid');
         $queryBuilder->setParameter('uid', $uid, IQueryBuilder::PARAM_STR);
+        $result = $queryBuilder->executeQuery();
+        return $result->fetchAllAssociative();
+    }
+
+    public function getAria2Rows(): array
+    {
+        $queryBuilder = $this->conn->getQueryBuilder()
+            ->select('uid', 'gid', 'filename', 'data')
+            ->from($this->table)
+            ->where('type = :type')
+            ->orderBy('id', 'DESC');
+        $queryBuilder->setParameter('type', ToolsHelper::DOWNLOADTYPE['ARIA2'], IQueryBuilder::PARAM_INT);
         $result = $queryBuilder->executeQuery();
         return $result->fetchAllAssociative();
     }
