@@ -2,6 +2,15 @@
 
 All notable changes to MediaFetch will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- Made completed HTTP, magnet and torrent downloads appear in Nextcloud without requiring a manual `occ files:scan`.
+- Corrected the aria2 hook argument order (`GID`, file count, file path) and preserved paths containing spaces.
+- Added a BitTorrent completion hook so multi-file torrents are scanned before seeding begins.
+- Removed the remaining call to the deleted legacy `folderScan` class.
+
 ## [1.0.0] - 2026-08-26
 
 ### Added

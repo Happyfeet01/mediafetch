@@ -4,6 +4,7 @@ namespace OCA\NCDownloader\AppInfo;
 
 use OCA\NCDownloader\Aria2\Aria2;
 use OCA\NCDownloader\Db\Settings;
+use OCA\NCDownloader\Files\Aria2DownloadScanner;
 use OCA\NCDownloader\Files\MediaImporter;
 use OCA\NCDownloader\Http\Client;
 use OCA\NCDownloader\Tools\Helper;
@@ -16,6 +17,7 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
 class Application extends App implements IBootstrap
@@ -39,6 +41,13 @@ class Application extends App implements IBootstrap
 
         $context->registerService(MediaImporter::class, function (ContainerInterface $container) {
             return new MediaImporter($container->get(IRootFolder::class));
+        });
+
+        $context->registerService(Aria2DownloadScanner::class, function (ContainerInterface $container) {
+            return new Aria2DownloadScanner(
+                $container->get(IRootFolder::class),
+                $container->get(LoggerInterface::class)
+            );
         });
 
         $sites = Helper::getSearchSites();
@@ -85,6 +94,7 @@ class Application extends App implements IBootstrap
 
             $aria2Conf += [
                 'on-download-complete' => $appPath . '/hooks/completeHook.sh',
+                'on-bt-download-complete' => $appPath . '/hooks/completeHook.sh',
                 'on-download-start' => $appPath . '/hooks/startHook.sh',
             ];
 
