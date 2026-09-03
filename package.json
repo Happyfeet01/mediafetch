@@ -1,7 +1,7 @@
 {
   "name": "mediafetch",
   "description": "MediaFetch - a Nextcloud download manager for aria2 and yt-dlp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Happyfeet01",
   "contributors": [
     "Jiaxin Huang <freefallbenson@gmail.com>"
@@ -14,13 +14,13 @@
     "download-manager"
   ],
   "bugs": {
-    "url": "https://github.com/Happyfeet01/ncdownloader/issues"
+    "url": "https://github.com/Happyfeet01/mediafetch/issues"
   },
   "repository": {
-    "url": "https://github.com/Happyfeet01/ncdownloader",
+    "url": "https://github.com/Happyfeet01/mediafetch",
     "type": "git"
   },
-  "homepage": "https://github.com/Happyfeet01/ncdownloader",
+  "homepage": "https://github.com/Happyfeet01/mediafetch",
   "license": "AGPL-3.0-or-later",
   "private": true,
   "scripts": {
