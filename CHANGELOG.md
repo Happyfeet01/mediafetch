@@ -5,6 +5,12 @@ All notable changes to Vapor will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Completed HTTP, magnet and torrent downloads now appear in Nextcloud without requiring a manual `occ files:scan`. [Issue #4]
+
 ## [1.0.3] - 2026-07-23
 
 ### Changed
@@ -77,4 +83,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Database index name collision on fresh install (`gid_index` → `vapor_gid_index`)
 
 [1.0.0]: https://github.com/wolfravenous/vapor/releases/tag/v1.0.0
-

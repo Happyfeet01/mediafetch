@@ -1,6 +1,8 @@
 <?php
 namespace OCA\Vapor\Db;
 use OCA\Vapor\Tools\Helper as ToolsHelper;
+use OCP\DB\QueryBuilder\IQueryBuilder;
+use OCP\IDBConnection;
 
 class Helper
 {
@@ -10,11 +12,11 @@ class Helper
     private $prefixedTable;
     public $queryBuilder;
 
-    public function __construct()
+    public function __construct(?IDBConnection $connection = null)
     {
         // $this->conn = \OC::$server->getDatabaseConnection();
 	// BEGIN STEVE EDITS
-        $this->conn = \OC::$server->get(\OCP\IDBConnection::class);
+        $this->conn = $connection ?? \OC::$server->get(IDBConnection::class);
         // END STEVE EDITS    
 	$this->queryBuilder = $this->conn->getQueryBuilder();
         $this->prefixedTable = $this->queryBuilder->getTableName($this->table);
@@ -51,6 +53,18 @@ class Helper
             ->setParameter('uid', $uid)
             ->executeQuery();
         return $queryBuilder->fetchAll();
+    }
+
+    public function getAria2Rows(): array
+    {
+        $queryBuilder = $this->conn->getQueryBuilder()
+            ->select('uid', 'gid', 'filename', 'data')
+            ->from($this->table)
+            ->where('type = :type')
+            ->orderBy('id', 'DESC');
+        $queryBuilder->setParameter('type', ToolsHelper::DOWNLOADTYPE['ARIA2'], IQueryBuilder::PARAM_INT);
+        $result = $queryBuilder->executeQuery();
+        return $result->fetchAllAssociative();
     }
 
     public function getUidByGid($gid)

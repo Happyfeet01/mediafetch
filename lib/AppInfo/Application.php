@@ -3,6 +3,7 @@
 namespace OCA\Vapor\AppInfo;
 
 use OCA\Vapor\Aria2\Aria2;
+use OCA\Vapor\Files\Aria2DownloadScanner;
 use OCA\Vapor\Http\Client;
 use OCA\Vapor\Tools\Helper;
 use OCA\Vapor\Db\Settings;
@@ -11,9 +12,11 @@ use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use OCP\Files\IRootFolder;
 use Symfony\Component\DomCrawler\Crawler;
 use Psr\Container\ContainerInterface;
 use OCP\IL10N;
+use Psr\Log\LoggerInterface;
 
 class Application extends App implements IBootstrap
 {
@@ -31,6 +34,12 @@ class Application extends App implements IBootstrap
         });
         $context->registerService(Crawler::class, function () {
             return new Crawler();
+        });
+        $context->registerService(Aria2DownloadScanner::class, function (ContainerInterface $container) {
+            return new Aria2DownloadScanner(
+                $container->get(IRootFolder::class),
+                $container->get(LoggerInterface::class)
+            );
         });
         $sites = Helper::getSearchSites();
         foreach ($sites as $site) {

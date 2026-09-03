@@ -526,6 +526,16 @@ public static function getLocalFolder(string $path): string
         $rpcHost = Helper::getAdminSettings("ncd_aria2_rpc_host");
         $rpcPort = Helper::getAdminSettings("ncd_aria2_rpc_port");
         $binary = Helper::getAdminSettings("ncd_aria2_binary");
+        $aria2Conf = Helper::getSettings("global_aria2_config", [], $settings::TYPE['SYSTEM']);
+        if (!is_array($aria2Conf)) {
+            $aria2Conf = [];
+        }
+        $aria2Conf += [
+            'on-download-complete' => $appPath . '/hooks/completeHook.sh',
+            'on-bt-download-complete' => $appPath . '/hooks/completeHook.sh',
+            'on-download-error' => $appPath . '/hooks/errorHook.sh',
+            'on-download-start' => $appPath . '/hooks/startHook.sh',
+        ];
         $config = [
             'dir' => $realDownloadDir,
             'torrentsDir' => $torrentsDir,
@@ -537,7 +547,7 @@ public static function getLocalFolder(string $path): string
             'binary' => $binary,
             'startHook' => $appPath . "/hooks/startHook.sh",
             'completeHook' => $appPath . "/hooks/completeHook.sh",
-            'aria2Conf' => Helper::getSettings("global_aria2_config", [], $settings::TYPE['SYSTEM'])
+            'aria2Conf' => $aria2Conf,
         ];
         return $config;
     }
