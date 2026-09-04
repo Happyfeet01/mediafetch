@@ -6,12 +6,15 @@ namespace OCA\NCDownloader\Files;
 
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
+use OCP\IConfig;
 use RuntimeException;
 
 final class MediaImporter
 {
-    public function __construct(private IRootFolder $rootFolder)
-    {
+    public function __construct(
+        private IRootFolder $rootFolder,
+        private IConfig $config
+    ) {
     }
 
     public function createWorkspace(string $uid): string
@@ -20,13 +23,24 @@ final class MediaImporter
             throw new RuntimeException('Cannot create a MediaFetch workspace without a user.');
         }
 
-        $base = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR)
-            . DIRECTORY_SEPARATOR . 'mediafetch'
-            . DIRECTORY_SEPARATOR . hash('sha256', $uid);
+        $configuredBase = trim((string) $this->config->getAppValue('mediafetch', 'work_directory', ''));
+        $workspaceRoot = $configuredBase !== ''
+            ? rtrim($configuredBase, DIRECTORY_SEPARATOR)
+            : rtrim(sys_get_temp_dir() === '/tmp' ? '/var/tmp/mediafetch' : sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'mediafetch', DIRECTORY_SEPARATOR);
 
+        if ($workspaceRoot === '' || $workspaceRoot[0] !== DIRECTORY_SEPARATOR || str_contains($workspaceRoot, "\0")) {
+            throw new RuntimeException('The configured MediaFetch work directory must be an absolute path.');
+        }
+
+        if (!is_dir($workspaceRoot) && !mkdir($workspaceRoot, 0700, true) && !is_dir($workspaceRoot)) {
+            throw new RuntimeException('Could not create the MediaFetch work directory.');
+        }
+
+        $base = $workspaceRoot . DIRECTORY_SEPARATOR . hash('sha256', $uid);
         if (!is_dir($base) && !mkdir($base, 0700, true) && !is_dir($base)) {
             throw new RuntimeException('Could not create the MediaFetch workspace directory.');
         }
+        @chmod($base, 0700);
 
         $workspace = $base . DIRECTORY_SEPARATOR . bin2hex(random_bytes(12));
         if (!mkdir($workspace, 0700, false) && !is_dir($workspace)) {
