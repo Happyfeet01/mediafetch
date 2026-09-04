@@ -113,14 +113,28 @@ class Helper
         }
     }
 
-    public function updateAllStatus(int $status): void
+    public function setCurrentFilename(string $filename): void
+    {
+        if ($this->gid) {
+            $this->dbconn->setFilename($this->gid, basename($filename));
+        }
+    }
+
+    public function updateAllStatus(int $status, bool $preserveComplete = false): void
     {
         $this->status = $status;
         $gids = $this->gids;
         if ($gids === [] && $this->placeholderGid) {
             $gids[] = $this->placeholderGid;
         }
+
         foreach (array_unique($gids) as $gid) {
+            if ($preserveComplete) {
+                $row = $this->dbconn->getByGid($gid);
+                if ($row && (int) ($row['status'] ?? -1) === ToolsHelper::STATUS['COMPLETE']) {
+                    continue;
+                }
+            }
             $this->dbconn->updateStatus($gid, $status);
         }
     }
