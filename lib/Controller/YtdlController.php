@@ -144,17 +144,74 @@ class YtdlController extends Controller
             return ['error' => 'MediaFetch could not create a private download workspace.'];
         }
 
+        $targetPath = Helper::getDownloadDir();
+        $directImported = [];
+        $directImportFailed = false;
+
         $yt->setDownloadDir($workspace);
-        $yt->dbDlPath = Helper::getDownloadDir();
-        $resp = $yt->forceIPV4()->download($url);
+        $yt->dbDlPath = $targetPath;
+        $yt->setCompletedFileHandler(function (string $source) use ($yt, $workspace, $targetPath, &$directImported, &$directImportFailed): void {
+            if (isset($directImported[$source])) {
+                return;
+            }
+
+            $yt->markCurrentImporting();
+
+            try {
+                $item = $this->mediaImporter->importFile(
+                    $this->uid,
+                    $workspace,
+                    $source,
+                    $targetPath,
+                    false
+                );
+                $directImported[$source] = $item;
+                $yt->markCurrentImported((string) $item['name']);
+            } catch (\Throwable $e) {
+                $directImportFailed = true;
+                $this->logger->error(
+                    'Could not import completed yt-dlp item immediately: ' . $e->getMessage(),
+                    ['app' => 'mediafetch', 'workspace' => $workspace, 'source' => $source, 'user' => $this->uid]
+                );
+            }
+        });
+
+        try {
+            $resp = $yt->forceIPV4()->download($url);
+        } finally {
+            $yt->setCompletedFileHandler(null);
+        }
+
+        $alreadyImportedSources = array_keys($directImported);
 
         if (isset($resp['error'])) {
-            $this->mediaImporter->cleanupWorkspace($workspace);
+            try {
+                $this->mediaImporter->importWorkspace(
+                    $this->uid,
+                    $workspace,
+                    $targetPath,
+                    $alreadyImportedSources
+                );
+                $this->mediaImporter->cleanupWorkspace($workspace);
+            } catch (\Throwable $e) {
+                $this->logger->error(
+                    'yt-dlp failed and MediaFetch could not salvage all completed files: ' . $e->getMessage(),
+                    ['app' => 'mediafetch', 'workspace' => $workspace, 'user' => $this->uid]
+                );
+            }
+
             return $resp;
         }
 
         try {
-            $imported = $this->mediaImporter->importWorkspace($this->uid, $workspace, Helper::getDownloadDir());
+            $remaining = $this->mediaImporter->importWorkspace(
+                $this->uid,
+                $workspace,
+                $targetPath,
+                $alreadyImportedSources
+            );
+
+            $imported = array_merge(array_values($directImported), $remaining);
             $yt->markImported($imported);
             $this->mediaImporter->cleanupWorkspace($workspace);
         } catch (\Throwable $e) {
@@ -163,7 +220,14 @@ class YtdlController extends Controller
                 'yt-dlp download completed but Nextcloud import failed: ' . $e->getMessage(),
                 ['app' => 'mediafetch', 'workspace' => $workspace, 'user' => $this->uid]
             );
-            return ['error' => 'Download finished, but MediaFetch could not add the file to Nextcloud. The temporary download was kept for recovery.'];
+            return ['error' => 'Download finished, but MediaFetch could not add all files to Nextcloud. The temporary download was kept for recovery.'];
+        }
+
+        if ($directImportFailed) {
+            $this->logger->warning(
+                'One or more immediate yt-dlp imports failed but were recovered by the final workspace import.',
+                ['app' => 'mediafetch', 'user' => $this->uid]
+            );
         }
 
         if ($imported === []) {
@@ -177,7 +241,7 @@ class YtdlController extends Controller
                 : sprintf('Added %d files to Nextcloud', count($names)),
             'file' => $names[0] ?? '',
             'files' => $names,
-            'path' => Helper::getDownloadDir(),
+            'path' => $targetPath,
         ];
     }
 
