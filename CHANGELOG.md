@@ -10,6 +10,7 @@ All notable changes to MediaFetch will be documented in this file.
 - Completed yt-dlp playlist items are now imported into Nextcloud immediately after yt-dlp's `after_move` stage instead of waiting for the entire playlist job to finish.
 - Already imported playlist items keep their completed state while later entries continue downloading or fail.
 - A final workspace pass still imports sidecar files and recovers completed files if an immediate per-item import was not possible.
+- yt-dlp staging now defaults to `/var/tmp/mediafetch` instead of `/tmp/mediafetch` so large downloads do not consume a tmpfs-backed `/tmp`; administrators can override the work directory with the `mediafetch` app setting `work_directory`.
 
 ## [1.0.1] - 2026-09-03
 
