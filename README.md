@@ -55,3 +55,6 @@ The active development branch for the rebrand and Nextcloud 34 work is `mediafet
 MediaFetch is licensed under the **GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)**.
 
 It is based on the original NCDownloader / Net loader project by Jiaxin Huang and subsequent contributors. The existing copyright and license history is retained.
+
+### Download
+https://apps.nextcloud.com/apps/mediafetch
