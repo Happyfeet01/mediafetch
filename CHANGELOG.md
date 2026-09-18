@@ -4,6 +4,16 @@ All notable changes to MediaFetch will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-09-18
+
+### Changed
+
+- Added Nextcloud 35 to the supported App Store compatibility range while retaining Nextcloud 32–34 support.
+- Added PHP 8.5 to the declared compatibility range while retaining PHP 8.2 support for older supported Nextcloud releases.
+- Expanded CI PHP checks to PHP 8.2, 8.3, 8.4 and 8.5.
+- Verified the existing MediaFetch occ command already uses the Symfony 7-compatible `execute(...): int` signature required by Nextcloud 35.
+- This is a compatibility release; downloader behavior is unchanged from 1.1.0.
+
 ## [1.1.0] - 2026-09-07
 
 ### Changed
