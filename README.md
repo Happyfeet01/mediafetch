@@ -26,13 +26,13 @@ It continues the NCDownloader / Net loader codebase with support for current Nex
 
 Current App Store compatibility:
 
-- Nextcloud 32–34
-- PHP 8.2–8.4
+- Nextcloud 32–35
+- PHP 8.2–8.5
 - aria2
 - yt-dlp
 - ffmpeg for media conversion, extraction and post-processing
 
-> PHP 8.5 is not advertised as supported by MediaFetch yet. It should only be added to the compatibility range after the application and CI have been tested successfully with it.
+> Nextcloud 35 itself requires PHP 8.3 or newer. MediaFetch keeps PHP 8.2 support for installations running supported older Nextcloud releases.
 
 ## Installation
 

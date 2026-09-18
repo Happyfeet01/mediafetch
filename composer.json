@@ -1,6 +1,6 @@
 {
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.2 <8.6",
         "psr/log": "^3.0",
         "symfony/css-selector": "^7.3",
         "symfony/dom-crawler": "^7.3",
