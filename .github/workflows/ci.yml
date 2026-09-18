@@ -13,15 +13,19 @@ permissions:
 
 jobs:
   php:
-    name: PHP checks
+    name: PHP ${{ matrix.php }} checks
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up PHP 8.4
+      - name: Set up PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: ${{ matrix.php }}
           coverage: none
           tools: composer:v2
 
