@@ -38,6 +38,9 @@ jobs:
       - name: PHP syntax check
         run: find appinfo lib templates -type f -name '*.php' -print0 | xargs -0 -n1 php -l
 
+      - name: Test downloader IP probe
+        run: php tests/downloader-ip.php
+
       - name: Validate appinfo XML
         run: php -r '$xml = simplexml_load_file("appinfo/info.xml"); if ($xml === false) { exit(1); } if ((string)$xml->id !== "mediafetch") { fwrite(STDERR, "Unexpected app id\n"); exit(1); }'
 
@@ -54,6 +57,9 @@ jobs:
 
       - name: Install frontend dependencies
         run: npm install --no-audit --no-fund
+
+      - name: Test torrent search actions
+        run: node tests/torrent-search-actions.cjs
 
       - name: Build frontend
         run: npm run build

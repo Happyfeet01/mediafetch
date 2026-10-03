@@ -96,7 +96,12 @@ class Aria2Controller extends Controller
         try {
             return new JSONResponse(['ip' => $this->aria2->externalIp(), 'checkedAt' => gmdate('c')]);
         } catch (\Throwable $e) {
-            return new JSONResponse(['error' => 'The downloader IP could not be determined.'], 503);
+            \OC::$server->get(\Psr\Log\LoggerInterface::class)->warning(
+                'MediaFetch downloader IP check failed: ' . $e->getMessage(),
+                ['app' => 'mediafetch']
+            );
+            return new JSONResponse(['error' => $e instanceof \RuntimeException
+                ? $e->getMessage() : 'Interner Fehler bei der IP-Prüfung.'], 503);
         }
     }
 
