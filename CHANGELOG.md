@@ -4,6 +4,19 @@ All notable changes to MediaFetch will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-10-03
+
+### Added
+
+- Added a public downloader IP check through the running aria2 daemon, including a timestamp and specific failure diagnostics.
+- Added regression tests for torrent search actions and the IP probe, including CI execution.
+
+### Fixed
+
+- Torrent search download buttons now use the MediaFetch route and correctly submit the selected result's link.
+- Nested button clicks, clipboard actions and HTTP failures are handled correctly.
+- IP checks retain relevant proxy settings while excluding unrelated torrent/file options, and use bounded RPC timeouts.
+
 ## [1.1.1] - 2026-09-18
 
 ### Changed
