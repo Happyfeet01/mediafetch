@@ -88,6 +88,18 @@ class Aria2Controller extends Controller
         return new JSONResponse($resp);
     }
 
+    /**
+     * @NoAdminRequired
+     */
+    public function externalIp(): JSONResponse
+    {
+        try {
+            return new JSONResponse(['ip' => $this->aria2->externalIp(), 'checkedAt' => gmdate('c')]);
+        } catch (\Throwable $e) {
+            return new JSONResponse(['error' => 'The downloader IP could not be determined.'], 503);
+        }
+    }
+
     private function doAction($action, $gid)
     {
         if (!$action || !$gid) {

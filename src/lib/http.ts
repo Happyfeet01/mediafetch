@@ -60,12 +60,14 @@ export const Http = class {
                     let status = this.client.status;
                     const contentType = this.client.getResponseHeader("Content-Type")
                     if (status === 0 || (status >= 200 && status < 400)) {
-                        if (typeof callback === 'function' && contentType.indexOf("application/json") !== -1) {
+                        if (typeof callback === 'function' && (contentType || "").indexOf("application/json") !== -1) {
                             callback(JSON.parse(this.client.response));
                         }
                         else {
                             callback(this.client.response);
                         }
+                    } else if (typeof this.errorHandler === 'function') {
+                        this.errorHandler(this.client);
                     }
                 }
             }

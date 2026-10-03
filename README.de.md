@@ -33,3 +33,9 @@ composer install
 Ein aktueller Statusbericht liegt hier:
 
 - `docs/npm-package-status.md`
+
+### Externe Downloader-IP
+
+Mit „Downloader-IP prüfen“ lässt sich die aktuelle externe IP anzeigen. Die Prüfung lädt eine kleine IP-Antwort von `https://api.ipify.org` über den laufenden aria2-Daemon und dessen HTTP-Proxy-Einstellungen. Bei einem über Gluetun gerouteten aria2-Daemon wird entsprechend dessen VPN-Ausgang verwendet. Die Prüfung startet aria2 nicht automatisch und fällt bei Fehlern nicht auf den Netzwerkweg von PHP oder dem Browser zurück. Die Anzeige ist eine Momentaufnahme des HTTP-Netzwerkwegs und bestätigt weder einen aktiven VPN noch die IP aller BitTorrent-Verbindungen (etwa bei getrennten Proxy-/IPv6-Regeln). Der IP-Dienst sieht die anfragende Ausgangs-IP.
+
+Die temporäre Prüfdatei wird im aria2-Konfigurationsverzeichnis angelegt und nach der Prüfung entfernt. Dieses Verzeichnis muss für PHP und aria2 zugänglich sein. Ein separater Remote-Daemon ohne gemeinsam zugängliches Verzeichnis liefert „IP unbekannt“.

@@ -335,6 +335,62 @@ class Aria2
         return false;
     }
 
+    /** Query the public IP through the downloader's own network/proxy configuration.
+     * No PHP/browser-network fallback: an unavailable result must stay unknown.
+     */
+    public function externalIp(): string
+    {
+        $directory = $this->confDir . '/ip-check-' . bin2hex(random_bytes(12));
+        if (!mkdir($directory, 0700, true)) {
+            throw new \RuntimeException('Cannot create IP check directory');
+        }
+        $gid = null;
+        try {
+            $options = array_merge($this->options, [
+                'dir' => $directory, 'out' => 'ip.txt', 'max-tries' => '1',
+                'connect-timeout' => '3', 'timeout' => '5',
+                'max-file-not-found' => '1', 'allow-overwrite' => 'true',
+                'auto-file-renaming' => 'false', 'split' => '1',
+                'max-connection-per-server' => '1', 'pause' => 'false',
+            ]);
+            $response = $this->request([
+                'method' => 'aria2.addUri',
+                'params' => [$this->token, ['https://api.ipify.org'], $options],
+            ]);
+            $gid = $response['result'] ?? null;
+            if (!is_string($gid)) {
+                throw new \RuntimeException('IP check could not start');
+            }
+            $deadline = microtime(true) + 8;
+            do {
+                $status = $this->request([
+                    'method' => 'aria2.tellStatus',
+                    'params' => [$this->token, $gid, ['status']],
+                ])['result']['status'] ?? 'error';
+                if ($status === 'complete') {
+                    $ip = trim((string) file_get_contents($directory . '/ip.txt', false, null, 0, 128));
+                    if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+                        throw new \RuntimeException('Invalid IP response');
+                    }
+                    return $ip;
+                }
+                if (in_array($status, ['error', 'removed'], true)) {
+                    throw new \RuntimeException('IP check failed');
+                }
+                usleep(200000);
+            } while (microtime(true) < $deadline);
+            throw new \RuntimeException('IP check timed out');
+        } finally {
+            if (is_string($gid)) {
+                $this->request(['method' => 'aria2.forceRemove', 'params' => [$this->token, $gid]]);
+                $this->request(['method' => 'aria2.removeDownloadResult', 'params' => [$this->token, $gid]]);
+            }
+            @unlink($directory . '/ip.txt');
+            @unlink($directory . '/ip.txt.aria2');
+            @rmdir($directory);
+        }
+    }
+
     public function btDownload($file)
     {
         if ($data = file_get_contents($file)) {

@@ -1,5 +1,11 @@
 <template>
   <form class="main-form" id="nc-vue-unified-form" :action="path">
+    <div class="downloader-ip">
+      <button type="button" :disabled="ipLoading" @click="checkIp">
+        {{ ipLoading ? 'IP wird geprüft …' : 'Downloader-IP prüfen' }}
+      </button>
+      <span role="status">{{ ipStatus }}</span>
+    </div>
     <div class="options-group">
       <div
         class="magnet-link http-link option-buttons active-button"
@@ -64,12 +70,16 @@ import uploadFile from "./uploadFile";
 import { translate as t } from "@nextcloud/l10n";
 import folderSettings from "./folderSettings.vue";
 
+import helper from "../utils/helper";
+
 const APP_ID = "mediafetch";
 
 export default {
   inject: ["settings", "search_sites"],
   data() {
     return {
+      ipLoading: false,
+      ipStatus: 'Noch nicht geprüft',
       checkedValue: false,
       path: this.uris.aria2_url,
       dlPath: this.settings.settings.ncd_downloader_dir,
@@ -90,6 +100,22 @@ export default {
     folderSettings,
   },
   methods: {
+    checkIp() {
+      this.ipLoading = true;
+      this.ipStatus = 'Prüfung läuft …';
+      helper.httpClient(helper.generateUrl('/apps/mediafetch/aria2/external-ip'))
+        .setMethod('GET')
+        .setHandler((data) => {
+          this.ipLoading = false;
+          this.ipStatus = data.ip
+            ? `Externe Downloader-IP: ${data.ip} (Stand: ${new Date(data.checkedAt).toLocaleTimeString()})`
+            : 'IP unbekannt – Prüfung fehlgeschlagen';
+        })
+        .setErrorHandler(() => {
+          this.ipLoading = false;
+          this.ipStatus = 'IP unbekannt – Prüfung fehlgeschlagen';
+        }).send();
+    },
     whichType(type, event) {
       const element = event.target;
       const nodeList = document.querySelectorAll(".option-buttons");
@@ -143,7 +169,18 @@ export default {
 #nc-vue-unified-form {
   display: flex;
   width: 100%;
-  height: $column-height;
+  min-height: $column-height;
+  height: auto;
+  flex-wrap: wrap;
+  .downloader-ip {
+    flex-basis: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 8px;
+    font-size: 13px;
+  }
   font-size: medium;
   .action-group {
     width: 100%;
