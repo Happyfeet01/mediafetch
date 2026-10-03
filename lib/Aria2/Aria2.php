@@ -189,9 +189,13 @@ class Aria2
         $this->options['follow-torrent'] = $follow;
         return $this;
     }
-    private function request($data)
+    private function request($data, ?int $timeout = null)
     {
         $this->init();
+        if ($timeout !== null) {
+            curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, min(2, $timeout));
+            curl_setopt($this->ch, CURLOPT_TIMEOUT, $timeout);
+        }
         $defaults = array(
             'jsonrpc' => '2.0',
             'id' => 'ncdownloader',
@@ -341,49 +345,75 @@ class Aria2
     public function externalIp(): string
     {
         $directory = $this->confDir . '/ip-check-' . bin2hex(random_bytes(12));
-        if (!mkdir($directory, 0700, true)) {
-            throw new \RuntimeException('Cannot create IP check directory');
+        if (!@mkdir($directory, 0700, true)) {
+            throw new \RuntimeException('Prüfverzeichnis konnte nicht erstellt werden.');
         }
         $gid = null;
         try {
-            $options = array_merge($this->options, [
+            // Copy network settings only: torrent checksums, selected files and
+            // arbitrary output/queue options do not apply to the IP response.
+            $options = [];
+            foreach (['all-proxy', 'all-proxy-user', 'all-proxy-passwd',
+                'https-proxy', 'https-proxy-user', 'https-proxy-passwd',
+                'http-proxy', 'http-proxy-user', 'http-proxy-passwd',
+                'no-proxy', 'proxy-method', 'user-agent'] as $key) {
+                if (isset($this->options[$key]) && is_scalar($this->options[$key])) {
+                    $options[$key] = (string) $this->options[$key];
+                }
+            }
+            $options += [
                 'dir' => $directory, 'out' => 'ip.txt', 'max-tries' => '1',
                 'connect-timeout' => '3', 'timeout' => '5',
-                'max-file-not-found' => '1', 'allow-overwrite' => 'true',
-                'auto-file-renaming' => 'false', 'split' => '1',
-                'max-connection-per-server' => '1', 'pause' => 'false',
-            ]);
+                'allow-overwrite' => 'true', 'auto-file-renaming' => 'false',
+                'split' => '1', 'max-connection-per-server' => '1',
+                'pause' => 'false', 'follow-torrent' => 'false',
+                'follow-metalink' => 'false', 'file-allocation' => 'none',
+            ];
             $response = $this->request([
                 'method' => 'aria2.addUri',
-                'params' => [$this->token, ['https://api.ipify.org'], $options],
-            ]);
+                'params' => [$this->token, ['https://api.ipify.org'], $options, 0],
+            ], 3);
+            if (!is_array($response)) {
+                throw new \RuntimeException('aria2 antwortet nicht auf die IP-Prüfung.');
+            }
             $gid = $response['result'] ?? null;
             if (!is_string($gid)) {
-                throw new \RuntimeException('IP check could not start');
+                throw new \RuntimeException('aria2 hat den Prüfauftrag abgelehnt (RPC-Code '
+                    . (int) ($response['error']['code'] ?? 0) . ').');
             }
             $deadline = microtime(true) + 8;
             do {
-                $status = $this->request([
+                $response = $this->request([
                     'method' => 'aria2.tellStatus',
-                    'params' => [$this->token, $gid, ['status']],
-                ])['result']['status'] ?? 'error';
+                    'params' => [$this->token, $gid, ['status', 'errorCode']],
+                ], 3);
+                if (!isset($response['result']['status'])) {
+                    throw new \RuntimeException('Status der IP-Prüfung ist nicht verfügbar.');
+                }
+                $status = $response['result']['status'];
                 if ($status === 'complete') {
+                    if (!is_readable($directory . '/ip.txt')) {
+                        throw new \RuntimeException('Prüfdatei ist für Nextcloud nicht lesbar. PHP und aria2 benötigen denselben Dateipfad und passende Zugriffsrechte.');
+                    }
                     $ip = trim((string) file_get_contents($directory . '/ip.txt', false, null, 0, 128));
                     if (!filter_var($ip, FILTER_VALIDATE_IP)) {
-                        throw new \RuntimeException('Invalid IP response');
+                        throw new \RuntimeException('IP-Dienst hat keine gültige IP geliefert.');
                     }
                     return $ip;
                 }
                 if (in_array($status, ['error', 'removed'], true)) {
-                    throw new \RuntimeException('IP check failed');
+                    throw new \RuntimeException('IP-Download fehlgeschlagen (aria2-Code '
+                        . (int) ($response['result']['errorCode'] ?? 0) . ').');
                 }
                 usleep(200000);
             } while (microtime(true) < $deadline);
-            throw new \RuntimeException('IP check timed out');
+            throw new \RuntimeException($status === 'waiting'
+                ? 'IP-Prüfung wartet auf einen freien Downloadplatz.'
+                : 'Zeitlimit der IP-Prüfung überschritten.');
         } finally {
             if (is_string($gid)) {
-                $this->request(['method' => 'aria2.forceRemove', 'params' => [$this->token, $gid]]);
-                $this->request(['method' => 'aria2.removeDownloadResult', 'params' => [$this->token, $gid]]);
+                $this->request(['method' => 'aria2.forceRemove', 'params' => [$this->token, $gid]], 2);
+                $this->request(['method' => 'aria2.removeDownloadResult', 'params' => [$this->token, $gid]], 2);
             }
             @unlink($directory . '/ip.txt');
             @unlink($directory . '/ip.txt.aria2');
