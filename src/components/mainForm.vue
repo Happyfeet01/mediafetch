@@ -111,9 +111,14 @@ export default {
             ? `Externe Downloader-IP: ${data.ip} (Stand: ${new Date(data.checkedAt).toLocaleTimeString()})`
             : 'IP unbekannt – Prüfung fehlgeschlagen';
         })
-        .setErrorHandler(() => {
+        .setErrorHandler((xhr) => {
           this.ipLoading = false;
-          this.ipStatus = 'IP unbekannt – Prüfung fehlgeschlagen';
+          let detail = xhr?.status ? `HTTP ${xhr.status}` : 'Netzwerkfehler';
+          try {
+            const response = JSON.parse(xhr.responseText);
+            if (response.error) detail = response.error;
+          } catch (_) { /* Non-JSON responses still show the HTTP status. */ }
+          this.ipStatus = `IP unbekannt – ${detail}`;
         }).send();
     },
     whichType(type, event) {
