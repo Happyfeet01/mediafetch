@@ -5,7 +5,8 @@ import Clipboard from '../lib/clipboard'
 import '../css/clipboard.scss';
 
 const buttonHandler = (event, type) => {
-    let element = event.target;
+    let element = event.target.closest('button');
+    if (!element || element.disabled) return;
     event.stopPropagation();
     event.preventDefault();
     let url = element.getAttribute("path");
@@ -15,8 +16,8 @@ const buttonHandler = (event, type) => {
         helper.loop(helper.getCounters);
         helper.setContentTableType("search-results");
     }
-    if (row = element.closest('.table-row-search')) {
-        if (element.className == 'icon-clipboard') {
+    if (row = element.closest('.table-row[data-link]')) {
+        if (element.classList.contains('icon-clipboard')) {
             const clippy = new Clipboard(element, row.dataset.link);
             clippy.Copy();
             return;
@@ -31,9 +32,12 @@ const buttonHandler = (event, type) => {
     }
     data['url'] = data["text-input-value"]
     delete data["text-input-value"]
+    element.disabled = true;
     helper.httpClient(url).setErrorHandler(function (xhr, textStatus, error) {
-        console.log(error);
+        helper.error(helper.t("Download request failed"));
+        element.disabled = false;
     }).setHandler(function (data) {
+        element.disabled = false;
         if (data.hasOwnProperty('error')) {
             helper.error(data['error']);
             return;
