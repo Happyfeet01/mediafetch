@@ -14,6 +14,7 @@ return [
         ['name' => 'Ytdl#Redownload', 'url' => '/ytdl/redownload', 'verb' => 'POST'],
         ['name' => 'Reset#reset', 'url' => '/downloads/reset', 'verb' => 'POST'],
         ['name' => 'Search#Execute', 'url' => '/search', 'verb' => 'POST'],
+        ['name' => 'Aria2#externalIp', 'url' => '/aria2/external-ip', 'verb' => 'GET'],
         // AdminSettings
         ['name' => 'Settings#saveAdmin', 'url' => '/admin/save', 'verb' => 'POST'],
         ['name' => 'Settings#saveGlobalAria2', 'url' => '/admin/aria2/save', 'verb' => 'POST'],
