@@ -183,8 +183,26 @@ export default {
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    padding-bottom: 8px;
+    margin-bottom: 8px;
+    padding: 8px;
     font-size: 13px;
+    background-color: var(--color-main-background, #fff);
+    color: var(--color-main-text, #222);
+    border: 1px solid var(--color-border, #ccc);
+    border-radius: var(--border-radius-element, 8px);
+
+    > span {
+      color: inherit;
+      overflow-wrap: anywhere;
+    }
+
+    > button {
+      height: auto;
+      color: inherit;
+      background-color: var(--color-background-dark, #ededed);
+      border: 1px solid var(--color-border, #ccc);
+      border-radius: var(--border-radius-element, 8px);
+    }
   }
   font-size: medium;
   .action-group {
