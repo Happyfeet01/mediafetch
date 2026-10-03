@@ -11,7 +11,7 @@ abstract class searchBase
     protected $searchUrl;
     protected $crawler;
     protected $client;
-    protected $actionLinks = [["name" => 'download', 'path' => '/index.php/apps/ncdownloader/new'], ['name' => 'clipboard']];
+    protected $actionLinks = [["name" => 'download', 'path' => '/apps/mediafetch/new'], ['name' => 'clipboard']];
 
     public function getTableTitles(): array
     {
@@ -41,7 +41,13 @@ abstract class searchBase
             if (!$value) {
                 continue;
             }
-            $value['actions'] = $links;
+            // Generate paths for installations in a subdirectory as well.
+            $value['actions'] = array_map(static function ($link) {
+                if (!empty($link['path'])) {
+                    $link['path'] = \OC::$server->get(\OCP\IURLGenerator::class)->linkToRoute('mediafetch.main.download');
+                }
+                return $link;
+            }, $links);
         }
     }
     public function getRows(): array
