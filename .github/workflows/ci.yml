@@ -41,6 +41,9 @@ jobs:
       - name: Test downloader IP probe
         run: php tests/downloader-ip.php
 
+      - name: Test Academic Torrents and Internet Archive providers
+        run: php tests/search-providers.php
+
       - name: Test safe search-provider JSON in app HTML
         run: php tests/index-template.php
 
