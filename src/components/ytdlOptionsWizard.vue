@@ -7,7 +7,7 @@
     <div v-else>
       <div class="mediafetch-builder-grid">
         <label>
-          Quick preset
+          {{ tr('Quick preset') }}
           <select v-model="preset" @change="applyPreset">
             <option value="">{{ tr('Custom / current settings') }}</option>
             <option value="music">{{ tr('Music: MP3, metadata and cover') }}</option>
@@ -16,7 +16,7 @@
           </select>
         </label>
         <label>
-          Download playlists
+          {{ tr('Download playlists') }}
           <select v-model="playlistMode">
             <option value="auto">{{ tr('Use yt-dlp default') }}</option>
             <option value="yes">{{ tr('Entire playlist') }}</option>
@@ -24,7 +24,7 @@
           </select>
         </label>
         <label>
-          Audio extraction / conversion
+          {{ tr('Audio extraction / conversion') }}
           <select v-model="audioMode">
             <option value="">{{ tr('No audio extraction') }}</option>
             <option value="best">{{ tr('Audio only (best available)') }}</option>
@@ -36,7 +36,7 @@
           </select>
         </label>
         <label v-if="audioMode">
-          Audio conversion quality
+          {{ tr('Audio conversion quality') }}
           <select v-model="audioQuality">
             <option value="">{{ tr('yt-dlp default') }}</option>
             <option value="0">{{ tr('Highest VBR quality (0)') }}</option>
@@ -45,7 +45,7 @@
           </select>
         </label>
         <label>
-          Video format / quality
+          {{ tr('Video format / quality') }}
           <select v-model="videoMode">
             <option value="">{{ tr('Use existing downloader defaults') }}</option>
             <option value="1080">{{ tr('Up to 1080p') }}</option>
@@ -54,11 +54,11 @@
           </select>
         </label>
         <label v-if="videoMode === 'custom'">
-          yt-dlp format expression
+          {{ tr('yt-dlp format expression') }}
           <input v-model.trim="customVideoFormat" type="text" placeholder="bv*+ba/b" />
         </label>
         <label>
-          Container after merging video streams
+          {{ tr('Container after merging video streams') }}
           <select v-model="mergeFormat">
             <option value="">{{ tr('yt-dlp default') }}</option>
             <option value="mp4">MP4</option>
@@ -70,28 +70,28 @@
 
       <fieldset>
         <legend>{{ tr('Metadata and subtitles') }}</legend>
-        <label><input v-model="embedMetadata" type="checkbox" /> Embed available metadata</label>
-        <label><input v-model="embedThumbnail" type="checkbox" /> Embed thumbnail / cover</label>
-        <label><input v-model="writeSubs" type="checkbox" /> Download subtitles</label>
-        <label><input v-model="writeAutoSubs" type="checkbox" /> Include automatic subtitles</label>
-        <label><input v-model="embedSubs" type="checkbox" /> Embed subtitles if supported</label>
+        <label><input v-model="embedMetadata" type="checkbox" /> {{ tr('Embed available metadata') }}</label>
+        <label><input v-model="embedThumbnail" type="checkbox" /> {{ tr('Embed thumbnail / cover') }}</label>
+        <label><input v-model="writeSubs" type="checkbox" /> {{ tr('Download subtitles') }}</label>
+        <label><input v-model="writeAutoSubs" type="checkbox" /> {{ tr('Include automatic subtitles') }}</label>
+        <label><input v-model="embedSubs" type="checkbox" /> {{ tr('Embed subtitles if supported') }}</label>
         <label>
-          Subtitle languages (optional)
+          {{ tr('Subtitle languages (optional)') }}
           <input v-model.trim="subtitleLanguages" type="text" placeholder="de,en" />
         </label>
       </fieldset>
 
       <div class="mediafetch-builder-grid">
         <label>
-          Speed limit (optional)
+          {{ tr('Speed limit (optional)') }}
           <input v-model.trim="limitRate" type="text" placeholder="e.g. 2M" />
         </label>
         <label>
-          Retries (optional)
+          {{ tr('Retries (optional)') }}
           <input v-model.trim="retries" type="number" min="0" step="1" placeholder="yt-dlp default" />
         </label>
         <label class="mediafetch-builder-wide">
-          Filename template (optional, filename only)
+          {{ tr('Filename template (optional, filename only)') }}
           <input v-model.trim="filenameTemplate" type="text" placeholder="%(title)s.%(ext)s" />
         </label>
       </div>
