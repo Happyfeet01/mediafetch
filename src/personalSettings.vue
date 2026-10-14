@@ -8,6 +8,7 @@
     @mounted="renderAria2" path="/apps/mediafetch/personal/aria2/save" :validOptions="aria2Options">
     <template #save>Save Aria2 Settings</template>
   </customOptions>
+  <ytdlOptionsWizard />
   <customOptions name="custom-ytdl-settings" title="Personal yt-dlp Settings" @mounted="renderYtdl"
     path="/apps/mediafetch/personal/ytdl/save" :validOptions="ytdlOptions">
     <template #save>Save yt-dlp Settings</template>
@@ -19,6 +20,7 @@ import helper from "./utils/helper";
 import safeAria2Options from "./utils/safeAria2Options";
 import safeYtdlOptions from "./utils/safeYtdlOptions";
 import settingsRow from "./components/settingsRow";
+import ytdlOptionsWizard from "./components/ytdlOptionsWizard";
 
 export default {
   name: "personalSettings",
@@ -34,6 +36,7 @@ export default {
   components: {
     customOptions,
     settingsRow,
+    ytdlOptionsWizard,
   },
   methods: {
     renderAria2(event, $vm) {
