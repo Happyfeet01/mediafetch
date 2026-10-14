@@ -9,11 +9,15 @@
     <template #save>{{ tr('Save Aria2 Settings') }}</template>
   </customOptions>
   <ytdlOptionsWizard ref="ytdlWizard" />
-  <customOptions name="custom-ytdl-settings"  :title="tr('Advanced yt-dlp Settings')" @mounted="renderYtdl"
-    @saved="refreshYtdlWizard"
-    path="/apps/mediafetch/personal/ytdl/save" :validOptions="ytdlOptions">
-    <template #save>{{ tr('Save yt-dlp Settings') }}</template>
-  </customOptions>
+  <details class="mediafetch-advanced-settings">
+    <summary class="mediafetch-advanced-summary">{{ tr('Advanced yt-dlp Settings') }}</summary>
+    <p class="mediafetch-advanced-note">{{ tr('Edit additional yt-dlp options only when needed. These are the same saved settings as in the graphical assistant.') }}</p>
+    <customOptions name="custom-ytdl-settings" :title="tr('Additional yt-dlp parameters')" @mounted="renderYtdl"
+      @saved="refreshYtdlWizard"
+      path="/apps/mediafetch/personal/ytdl/save" :validOptions="ytdlOptions">
+      <template #save>{{ tr('Save yt-dlp Settings') }}</template>
+    </customOptions>
+  </details>
 </template>
 <script>
 import customOptions from "./components/customOptions";
