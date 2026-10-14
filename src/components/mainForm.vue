@@ -29,28 +29,30 @@
     <div class="action-group">
       <div class="download-input-container" v-if="inputType === 'download'">
         <textInput :placeholder="placeholder" :dataType="downloadType"></textInput>
+        <div class="download-folder-row">
+          <folderSettings :path="dlPath"></folderSettings>
+        </div>
+        <div v-if="downloadType === 'ytdl'" class="download-preset-row">
+          <label for="select-value-preset">{{ tr('Download preset') }}</label>
+          <select id="select-value-preset" v-model="selectedPreset">
+            <option value="personal">{{ tr('My personal settings') }}</option>
+            <option value="youtube_video">{{ tr('YouTube video (1080p)') }}</option>
+            <option value="video_playlist">{{ tr('Video playlist (1080p)') }}</option>
+            <option value="music_track">{{ tr('Music track (MP3 + tags)') }}</option>
+            <option value="music_album">{{ tr('Music album (MP3 + tags)') }}</option>
+            <option value="music_playlist">{{ tr('Music playlist (MP3 + tags)') }}</option>
+          </select>
+          <p>{{ tr('This preset applies only to this download. Personal settings will not be changed.') }}</p>
+        </div>
         <div class="download-controls-container">
-          <div v-if="checkboxes" id="select-value-extension-container">
-            <select :value="selectedExt" id="select-value-extension">
-              <option id="defaultext" value="defaultext">{{ tr('Default') }}</option>
-              <optgroup :label="tr('Video')">
-                <option id="mp4" value="mp4">mp4</option>
-                <option id="webm" value="webm">webm</option>
-              </optgroup>
-              <optgroup :label="tr('Audio')">
-                <option id="m4a" value="m4a">m4a</option>
-                <option id="mp3" value="mp3">mp3</option>
-                <option id="vorbis" value="vorbis">vorbis</option>
-              </optgroup>
-            </select>
-          </div>
-          <actionButton className="download-button" @clicked="download"></actionButton>
           <uploadFile
             v-if="downloadType === 'aria2'"
             @uploadfile="uploadFile"
             :path="uris.upload_url"
           ></uploadFile>
-          <folderSettings :path="dlPath"></folderSettings>
+          <actionButton className="download-button" @clicked="download">
+            {{ tr('Start download') }}
+          </actionButton>
         </div>
       </div>
       <searchInput
@@ -87,14 +89,13 @@ export default {
       path: this.uris.aria2_url,
       dlPath: this.settings.settings.ncd_downloader_dir,
       inputType: "download",
-      checkboxes: false,
       downloadType: "aria2",
       placeholder: t(APP_ID, "Paste your http/magnet link here"),
       searchLabel: t(APP_ID, "Search Torrents"),
       searchOptions: Array.isArray(this.search_sites)
         ? this.search_sites.map((site) => ({ ...site, label: site.name === 'sliderkz' ? t(APP_ID, 'Music (slider.kz)') : site.label }))
         : this.noOptions(),
-      selectedExt: "defaultext",
+      selectedPreset: "personal",
       torrentNotice: t(APP_ID, 'Search results are supplied by external providers and are not verified by MediaFetch. BitTorrent downloads may also upload data to others. Users are responsible for complying with applicable laws and licenses.'),
     };
   },
@@ -145,7 +146,6 @@ export default {
       } else {
         this.path = this.uris.search_url;
       }
-      this.checkboxes = type === "ytdl";
       this.inputType = type === "search" ? "search" : "download";
     },
     download(event) {
@@ -394,6 +394,112 @@ export default {
       flex-direction: column;
       width: 100%;
       height: auto;
+    }
+  }
+}
+
+/* Download form: intuitive vertical reading order on desktop and mobile. */
+#nc-vue-unified-form {
+  .action-group > .download-input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    height: auto;
+    min-height: 0;
+    border: 0;
+    width: 100%;
+    min-width: 0;
+
+    > .text-input-link,
+    > .download-folder-row,
+    > .download-preset-row,
+    > .download-controls-container {
+      box-sizing: border-box;
+      display: flex;
+      flex: 0 0 auto;
+      height: auto;
+      min-height: 0;
+      width: 100%;
+      min-width: 0;
+      padding: 0;
+      margin: 0;
+      border: 0;
+    }
+
+    > .download-folder-row {
+      justify-content: stretch;
+
+      .downloader-folder-settings {
+        width: 100%;
+        min-height: 44px;
+        height: auto !important;
+      }
+    }
+
+    > .download-preset-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      padding: 10px;
+      border: 1px solid var(--color-border, #ccc);
+      border-radius: var(--border-radius-element, 8px);
+      background-color: var(--color-main-background);
+      color: var(--color-main-text);
+
+      label {
+        font-weight: 600;
+      }
+
+      select {
+        box-sizing: border-box;
+        display: block;
+        height: auto;
+        width: 100%;
+        min-height: 44px;
+        max-width: 100%;
+        padding: 8px 10px;
+        color: var(--color-main-text);
+        background: var(--color-main-background);
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius-element, 8px);
+      }
+
+      p {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--color-text-maxcontrast);
+      }
+    }
+
+    > .download-controls-container {
+      align-items: stretch;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+
+      .download-button {
+        min-height: 46px;
+        flex: 1 1 auto;
+        border-radius: var(--border-radius-element, 8px);
+        font-weight: 600;
+      }
+    }
+  }
+}
+@media only screen and (max-width: 600px) {
+  #nc-vue-unified-form .action-group > .download-input-container {
+    height: auto !important;
+    > .download-controls-container {
+      display: flex;
+      flex-direction: column;
+      height: auto;
+
+      .download-button {
+        width: 100%;
+        min-height: 48px;
+      }
     }
   }
 }
