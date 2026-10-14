@@ -12,8 +12,8 @@
     <div class="ncdownloader-settings-item" :data-tippy-content="btTooltip">
       <toggleButton
         v-if="isAdmin"
-        disabledText="Disable BT for non-admin users"
-        enabledText="Disable BT for non-admin users"
+         :disabledText="t(APP_ID, 'Disable BT for non-admin users')"
+         :enabledText="t(APP_ID, 'Disable BT for non-admin users')"
         :defaultStatus="btStatus"
         name="ncd_disable_bt"
         @changed="toggle"
@@ -65,6 +65,7 @@ export default {
     };
   },
   methods: {
+    t,
     toggle(name, value) {
       const data = {};
       data[name] = value ? 1 : 0;
