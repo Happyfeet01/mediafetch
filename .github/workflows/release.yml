@@ -20,6 +20,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install PHP 8.4 with XML support
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: simplexml,xmlreader,mbstring
+          coverage: none
+          tools: composer:v2
+
       - name: Verify matching app and package versions
         id: version
         shell: bash
@@ -43,14 +51,6 @@ jobs:
           else
             echo 'exists=false' >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Install PHP 8.4
-        if: steps.existing.outputs.exists != 'true'
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          coverage: none
-          tools: composer:v2
 
       - name: Install production PHP dependencies
         if: steps.existing.outputs.exists != 'true'
