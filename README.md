@@ -179,9 +179,9 @@ These settings are **optional** as well.
 
 An empty section is valid. Users only need to add entries when they intentionally want to override supported yt-dlp options.
 
-A graphical assistant offers common video/audio format choices, MP3 conversion, available metadata and thumbnail embedding, subtitles, playlists, speed limits and filename templates. The original advanced options editor remains available. The graphical assistant saves the same personal configuration as the advanced editor; it is not a separate downloader, and these are not per-job profiles.
+A graphical assistant offers common video/audio format choices, MP3 conversion, available metadata and thumbnail embedding, subtitles, playlists, speed limits and filename templates. The original advanced options editor is now tucked into an expandable section on the personal settings page, and options already represented by the graphical assistant are not duplicated there. Saving advanced-only parameters preserves the graphical settings. The graphical assistant saves the same personal configuration as the advanced editor; it is not a separate downloader, and these are not per-job profiles.
 
-The download form's explicit audio/video extension takes priority over personal defaults. With the default extension selected, saved audio extraction settings are respected.
+The settings page uses responsive fields on mobile devices, and the download form's explicit audio/video extension takes priority over personal defaults. With the default extension selected, saved audio extraction settings are respected.
 
 ### Torrent search providers
 
@@ -200,7 +200,9 @@ MediaFetch 2.0 uses the Nextcloud account language in its navigation, download/s
 
 There is no separate app-level language switch. The language is selected in Nextcloud's personal settings. Technical tool and command-line option names (such as `aria2`, `yt-dlp` or `--embed-metadata`) are intentionally not translated.
 
-Verify the catalogs and interpolation placeholders using `node tests/l10n.cjs`. Nextcloud's own localization tooling may regenerate `l10n/*.js` from the JSON catalogs during installation and updates.
+Verify the catalogs and interpolation placeholders using `node tests/l10n.cjs`.
+
+The `tests/index-template.php` regression test checks that provider names containing spaces, quotation marks and HTML-special characters remain valid JSON in Nextcloud's data attributes; this prevents the empty main-page failure caused by the new torrent search providers. Nextcloud's own localization tooling may regenerate `l10n/*.js` from the JSON catalogs during installation and updates.
 
 ## aria2 RPC
 
