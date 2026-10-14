@@ -191,6 +191,10 @@ The yt-dlp download form now uses a **Download preset** dropdown instead of the 
 - **YouTube video / video playlist**, up to 1080p, merging into MP4 when possible
 - **Music track**, **music album**, **music playlist**, with MP3 conversion, embedded metadata/thumbnail, and musician/playlist-index-aware filenames where information is available
 
+For music downloads, **Filename template (`output`)** and **Artist and title parsing rule (`parse-metadata`)** are separate settings. A typical `parse-metadata` rule is `%(title)s:(?P<artist>.+?) - (?P<title>.+)`; a filename template such as `%(artist)s - %(title)s.%(ext)s` belongs only in `output`. MediaFetch now validates this basic `FROM:TO` distinction and reports an actionable error for previously saved malformed values.
+
+On iOS Safari the URL field uses at least 16px text to prevent auto-zoom when it receives focus.
+
 Selecting a preset does **not** write to the user's personal yt-dlp settings; the server accepts only bundled preset identifiers, and the preset is retained for re-download. Video/audio metadata quality depends on the source.
 
 The main form places the target-folder picker below the URL, followed by the optional yt-dlp preset selector and the **Start download** button at the bottom.
