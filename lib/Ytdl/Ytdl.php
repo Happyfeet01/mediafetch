@@ -137,11 +137,18 @@ class Ytdl
         if ($this->audioOnly) {
             $this->audioMode();
         } else {
+            // A personal --format selector (for example the GUI quality limit)
+            // must not be overwritten by MediaFetch's default format selector.
+            if ($this->hasOption('--format') === false) {
+                $this->setOption(
+                    '--format',
+                    Helper::ffmpegInstalled() && $this->videoFormat
+                        ? 'bestvideo+bestaudio/best'
+                        : $this->format
+                );
+            }
             if (Helper::ffmpegInstalled() && $this->videoFormat) {
-                $this->setOption('--format', 'bestvideo+bestaudio/best');
                 $this->setVideoFormat($this->videoFormat);
-            } else {
-                $this->setOption('--format', $this->format);
             }
         }
 
