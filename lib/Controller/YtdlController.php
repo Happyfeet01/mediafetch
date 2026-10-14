@@ -148,13 +148,16 @@ class YtdlController extends Controller
             // Extension remains supported for legacy API callers only.
             $extension = trim((string) ($extension ?? $this->request->getParam('extension') ?? ''));
             if ($extension === '') {
+                // The visible "My personal settings" preset must really honor
+                // the configured yt-dlp output rather than force MP4 recoding.
                 $personalOptions = (new Settings($this->uid))->getYtdl();
-                $preferredAudio = (string) ($personalOptions['audio-format'] ?? 'best');
-                $extension = isset($personalOptions['extract-audio'])
-                    ? (in_array($preferredAudio, $this->audio_extensions, true) ? $preferredAudio : 'best')
-                    : 'mp4';
-            }
-            if (in_array($extension, $this->audio_extensions, true)) {
+                if (array_key_exists('extract-audio', $personalOptions)) {
+                    $yt->audioOnly = true;
+                    $preferredAudio = (string) ($personalOptions['audio-format'] ?? 'best');
+                    $yt->audioFormat = in_array($preferredAudio, $this->audio_extensions, true)
+                        ? $preferredAudio : 'best';
+                }
+            } elseif (in_array($extension, $this->audio_extensions, true)) {
                 $yt->audioOnly = true;
                 $yt->audioFormat = $extension;
             } elseif (in_array($extension, $this->video_extensions, true)) {
