@@ -117,7 +117,7 @@ export default {
           .setData(payload)
           .setHandler((resp) => {
             if (!resp || resp.error) {
-              helper.error(resp?.error || this.tr('Could not save settings.'));
+              helper.error(resp?.error ? this.tr(resp.error) : this.tr('Could not save settings.'));
               return;
             }
             this.options = Object.keys(payload).map((key) => ({ name: key, value: payload[key] }));
