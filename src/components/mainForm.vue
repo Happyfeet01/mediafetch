@@ -91,7 +91,9 @@ export default {
       downloadType: "aria2",
       placeholder: t(APP_ID, "Paste your http/magnet link here"),
       searchLabel: t(APP_ID, "Search Torrents"),
-      searchOptions: this.search_sites ? this.search_sites : this.noOptions(),
+      searchOptions: Array.isArray(this.search_sites)
+        ? this.search_sites.map((site) => ({ ...site, label: site.name === 'sliderkz' ? t(APP_ID, 'Music (slider.kz)') : site.label }))
+        : this.noOptions(),
       selectedExt: "defaultext",
       torrentNotice: t(APP_ID, 'Search results are supplied by external providers and are not verified by MediaFetch. BitTorrent downloads may also upload data to others. Users are responsible for complying with applicable laws and licenses.'),
     };
@@ -156,7 +158,7 @@ export default {
       this.$emit("uploadfile", event, vm);
     },
     optionCallback(option) {
-      if (option.label.toLowerCase() === "music") {
+      if (option.key === "sliderkz") {
         this.searchLabel = t(APP_ID, "Search Music");
       } else {
         this.searchLabel = t(APP_ID, "Search Torrents");
