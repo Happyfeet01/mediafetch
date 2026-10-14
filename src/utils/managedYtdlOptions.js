@@ -5,7 +5,7 @@ const managedYtdlOptions = [
   'format', 'merge-output-format', 'embed-metadata', 'no-embed-metadata',
   'embed-thumbnail', 'no-embed-thumbnail', 'write-subs', 'no-write-subs',
   'write-auto-subs', 'no-write-auto-subs', 'embed-subs', 'no-embed-subs',
-  'sub-langs', 'limit-rate', 'retries', 'output',
+  'sub-langs', 'limit-rate', 'retries', 'output', 'parse-metadata',
 ]
 
 export default managedYtdlOptions
