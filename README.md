@@ -159,6 +159,14 @@ docker exec -u www-data nextcloud-aio-nextcloud ffmpeg -version
 
 If the binary is visible as root but not executable as `www-data`, MediaFetch will not be able to use it.
 
+## Releases
+
+On a version bump to `appinfo/info.xml` merged into `master`, GitHub Actions tests and builds MediaFetch, then creates a GitHub release tagged `v<version>` with a compiled tarball and SHA-256 checksum. The version in `package.json` must match the Nextcloud app version.
+
+**The GitHub tarball is not a signed Nextcloud App Store update.** Publishing to the App Store requires packaging and signing with the app developer certificate, followed by an App Store submission.
+
+The release notes for version 2.0.0 are in `docs/releases/2.0.0.md`.
+
 ## Configuration
 
 MediaFetch exposes administrator settings and personal settings.
@@ -181,7 +189,7 @@ An empty section is valid. Users only need to add entries when they intentionall
 
 A graphical assistant offers common video/audio format choices, MP3 conversion, available metadata and thumbnail embedding, subtitles, playlists, speed limits and filename templates. The original advanced options editor is now tucked into an expandable section on the personal settings page, and options already represented by the graphical assistant are not duplicated there. Saving advanced-only parameters preserves the graphical settings. The graphical assistant saves the same personal configuration as the advanced editor; it is not a separate downloader, and these are not per-job profiles.
 
-The settings page uses responsive fields on mobile devices, and the download form's explicit audio/video extension takes priority over personal defaults. With the default extension selected, saved audio extraction settings are respected.
+The settings page uses responsive fields on mobile devices. The main download form now offers per-download presets instead of an extension override; choose **My personal settings** to use your saved configuration without changing it.
 
 ### Per-download presets
 
