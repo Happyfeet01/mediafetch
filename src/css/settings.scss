@@ -38,3 +38,190 @@
         border-color: #ebccd1;
     }
 }
+
+
+/* Nextcloud's settings container can be much narrower than the desktop layout.
+ * Never put labels and fixed-width inputs side by side on small screens. */
+.ncdownloader-personal-settings,
+.ncdownloader-admin-settings {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1050px;
+    min-width: 0;
+    margin: 0;
+    padding: 0 clamp(12px, 2vw, 24px);
+
+    > .section,
+    > .mediafetch-advanced-settings {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .section h3,
+    .section h2 {
+        overflow-wrap: anywhere;
+        font-size: clamp(20px, 3vw, 27px);
+        line-height: 1.3;
+    }
+
+    .mediafetch-setting-row {
+        display: grid;
+        grid-template-columns: minmax(145px, 240px) minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px 12px;
+        margin: 0 0 12px;
+        width: 100%;
+        max-width: 800px;
+        min-width: 0;
+
+        > label {
+            min-width: 0;
+            margin: 0;
+            overflow-wrap: anywhere;
+        }
+
+        > input[type="text"] {
+            min-width: 0;
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        > input[type="button"] {
+            width: auto;
+            justify-self: start;
+        }
+    }
+
+    .custom-settings-container {
+        width: 100%;
+        max-width: 840px;
+        min-width: 0;
+        box-sizing: border-box;
+
+        .mediafetch-options-editor {
+            min-width: 0;
+            width: 100%;
+
+            > div {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto;
+                gap: 8px;
+                align-items: center;
+                min-width: 0;
+                max-width: 800px;
+                margin-bottom: 10px;
+
+                > label {
+                    min-width: 0;
+                    overflow-wrap: anywhere;
+                }
+
+                > input[type="text"] {
+                    width: 100%;
+                    min-width: 0;
+                    box-sizing: border-box;
+                    max-width: 100%;
+                }
+
+                > button {
+                    min-width: 36px;
+                    min-height: 36px;
+                }
+            }
+
+            > button {
+                white-space: normal;
+                max-width: 100%;
+                margin: 4px 8px 4px 0;
+            }
+        }
+    }
+
+    .mediafetch-advanced-settings {
+        border: 1px solid var(--color-border, #ccc);
+        border-radius: var(--border-radius-large, 12px);
+        margin-top: 10px;
+        padding: 0 12px 12px;
+
+        .mediafetch-advanced-summary {
+            cursor: pointer;
+            padding: 14px 2px;
+            font-weight: 600;
+            color: var(--color-main-text);
+            overflow-wrap: anywhere;
+        }
+
+        .mediafetch-advanced-note {
+            color: var(--color-text-maxcontrast);
+            margin: 0 0 12px;
+            line-height: 1.5;
+        }
+
+        .custom-settings-container {
+            margin: 0;
+        }
+    }
+
+    .system-info-item {
+        flex-wrap: wrap;
+        gap: 6px;
+        min-width: 0;
+
+        .system-info-item-value {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+@media only screen and (max-width: 700px) {
+    .ncdownloader-personal-settings,
+    .ncdownloader-admin-settings {
+        padding: 0 12px;
+
+        > .section {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .mediafetch-setting-row {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 6px;
+            margin-bottom: 18px;
+
+            > label,
+            > input[type="text"] {
+                grid-column: 1 / -1;
+            }
+
+            > input[type="button"] {
+                grid-column: 1 / -1;
+                justify-self: start;
+            }
+        }
+
+        .custom-settings-container .mediafetch-options-editor > div {
+            grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+            gap: 6px;
+
+            > label {
+                grid-column: 1 / -1;
+            }
+
+            > input[type="text"] {
+                grid-column: 1 / 2;
+            }
+
+            > button {
+                grid-column: 2 / 3;
+            }
+        }
+
+        .mediafetch-advanced-settings {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    }
+}
