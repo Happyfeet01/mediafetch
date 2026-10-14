@@ -3,7 +3,7 @@
 namespace OCA\NCDownloader\Search\Sites;
 
 use OCA\NCDownloader\Tools\tableData;
-use OCP\Files\IAppData;
+use OCP\Files\AppData\IAppDataFactory;
 use OCP\Files\NotFoundException;
 
 /**
@@ -49,8 +49,11 @@ class AcademicTorrents extends searchBase implements searchInterface
 
     private function getCatalog(): string
     {
-        /** @var IAppData $appData */
-        $appData = \OC::$server->get(IAppData::class);
+        // Site providers are resolved via the server container rather than the
+        // app DI container. IAppData is app-scoped and cannot be instantiated
+        // directly by the server container, so explicitly request our app's
+        // storage through the factory (Nextcloud 25+).
+        $appData = \OC::$server->get(IAppDataFactory::class)->get('mediafetch');
         try {
             $folder = $appData->getFolder(self::CACHE_FOLDER);
         } catch (NotFoundException $e) {
