@@ -1,5 +1,5 @@
 <template>
-  <div :class="container" :path="path" :id="container">
+  <div class="mediafetch-setting-row" :class="container" :path="path" :id="container">
     <label :for="id">{{ label }}</label>
     <input
       type="text"
