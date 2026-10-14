@@ -60,6 +60,9 @@
         :selectOptions="searchOptions"
       ></searchInput>
     </div>
+    <p v-if="downloadType === 'search'" class="mediafetch-torrent-notice" role="note">
+      {{ torrentNotice }}
+    </p>
   </form>
 </template>
 <script>
@@ -90,6 +93,7 @@ export default {
       searchLabel: t(APP_ID, "Search Torrents"),
       searchOptions: this.search_sites ? this.search_sites : this.noOptions(),
       selectedExt: "defaultext",
+      torrentNotice: t(APP_ID, 'Search results are supplied by external providers and are not verified by MediaFetch. BitTorrent downloads may also upload data to others. Users are responsible for complying with applicable laws and licenses.'),
     };
   },
   components: {
@@ -205,6 +209,18 @@ export default {
     }
   }
   font-size: medium;
+  .mediafetch-torrent-notice {
+    flex: 1 1 100%;
+    max-width: 100%;
+    margin: 8px 0 0;
+    padding: 10px 12px;
+    line-height: 1.45;
+    font-size: 13px;
+    border-left: 3px solid var(--color-border);
+    border-radius: var(--border-radius-element);
+    color: var(--color-main-text);
+    background: var(--color-background-dark);
+  }
   .action-group {
     width: 100%;
   }
