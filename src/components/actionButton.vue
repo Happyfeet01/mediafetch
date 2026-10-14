@@ -1,13 +1,14 @@
 <template>
   <button ref="button" class="button-vue" :class="className" v-if="loading ^ 1" @click.prevent="handler">
-    <slot>Download</slot>
+    <slot>{{ t('mediafetch', 'Download') }}</slot>
   </button>
   <button class="bs-spinner" v-if="loading">
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" disabled></span><span
-      class="visually-hidden">Loading...</span>
+      class="visually-hidden">{{ t('mediafetch', 'Loading...') }}</span>
   </button>
 </template>
 <script>
+import { translate as t } from "@nextcloud/l10n";
 export default {
   data() {
     return {
@@ -15,6 +16,7 @@ export default {
     };
   },
   methods: {
+    t,
     handler(event) {
       if (this.enableLoading) this.loading = 1;
       this.$emit("clicked", event, this);
