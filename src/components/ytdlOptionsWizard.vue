@@ -116,18 +116,13 @@
 <script>
 import helper from '../utils/helper'
 import safeYtdlOptions from '../utils/safeYtdlOptions'
+import managedYtdlOptions from '../utils/managedYtdlOptions'
 
 const format1080 = 'bv*[height<=1080]+ba/b[height<=1080]'
 const format720 = 'bv*[height<=720]+ba/b[height<=720]'
 const has = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key)
 
-const managedKeys = [
-  'yes-playlist', 'no-playlist', 'extract-audio', 'audio-format', 'audio-quality',
-  'format', 'merge-output-format', 'embed-metadata', 'no-embed-metadata',
-  'embed-thumbnail', 'no-embed-thumbnail', 'write-subs', 'no-write-subs',
-  'write-auto-subs', 'no-write-auto-subs', 'embed-subs', 'no-embed-subs',
-  'sub-langs', 'limit-rate', 'retries', 'output',
-]
+
 
 export default {
   name: 'ytdlOptionsWizard',
@@ -157,7 +152,7 @@ export default {
   computed: {
     options() {
       const options = { ...this.saved }
-      managedKeys.forEach((key) => delete options[key])
+      managedYtdlOptions.forEach((key) => delete options[key])
 
       if (this.playlistMode === 'yes') options['yes-playlist'] = ''
       if (this.playlistMode === 'no') options['no-playlist'] = ''
