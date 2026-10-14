@@ -146,7 +146,8 @@ class YtdlController extends Controller
         // feedback instead of a long raw command-line usage error.
         $savedMetadataRule = (new Settings($this->uid))->getYtdl()['parse-metadata'] ?? null;
         if ($savedMetadataRule !== null && !MetadataRules::validParseMetadata($savedMetadataRule)) {
-            return new JSONResponse(['error' => MetadataRules::message()], 400);
+            // The existing download UI shows JSON errors from successful HTTP responses.
+            return new JSONResponse(['error' => MetadataRules::message()]);
         }
 
         $yt = $this->ytdl;
