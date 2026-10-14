@@ -183,6 +183,26 @@ A graphical assistant offers common video/audio format choices, MP3 conversion, 
 
 The settings page uses responsive fields on mobile devices, and the download form's explicit audio/video extension takes priority over personal defaults. With the default extension selected, saved audio extraction settings are respected.
 
+### Per-download presets
+
+The yt-dlp download form now uses a **Download preset** dropdown instead of the old format override. It offers:
+
+- **My personal settings** (unchanged yt-dlp options from the personal settings page)
+- **YouTube video / video playlist**, up to 1080p, merging into MP4 when possible
+- **Music track**, **music album**, **music playlist**, with MP3 conversion, embedded metadata/thumbnail, and musician/playlist-index-aware filenames where information is available
+
+Selecting a preset does **not** write to the user's personal yt-dlp settings; the server accepts only bundled preset identifiers, and the preset is retained for re-download. Video/audio metadata quality depends on the source.
+
+The main form places the target-folder picker below the URL, followed by the optional yt-dlp preset selector and the **Start download** button at the bottom.
+
+### BitTorrent seeding preference
+
+In Personal Settings → BitTorrent seeding, users can select **Stop seeding after the download completes**. For newly created aria2 tasks, this adds the per-download RPC option `seed-time=0`. This option stops post-download seeding; **it does not prevent uploading pieces while a torrent is downloading**. Existing tasks are not changed. When unchecked, the previous aria2 options remain in force.
+
+The two options generated from legacy `ncd_seed_time` / `ncd_seed_ratio` settings now use their valid aria2 names (`seed-time` / `seed-ratio`), only when configured.
+
+Empty arguments that require a value (such as `convert-thumbnails`) are now ignored rather than consuming the next command-line option. Actual no-value flags (such as `embed-metadata`) and `audio-quality=0` are kept as intended. Automated coverage is in `tests/yt-dlp-presets.php`.
+
 ### Torrent search providers
 
 The existing search dropdown lists the bundled providers, including The Pirate Bay and BitSearch, alongside **Internet Archive** and **Academic Torrents**. This changes only search discovery; MediaFetch does not enforce a content policy or filter torrent results based on the user's country.
