@@ -8,8 +8,9 @@
     @mounted="renderAria2" path="/apps/mediafetch/personal/aria2/save" :validOptions="aria2Options">
     <template #save>Save Aria2 Settings</template>
   </customOptions>
-  <ytdlOptionsWizard />
-  <customOptions name="custom-ytdl-settings" title="Personal yt-dlp Settings" @mounted="renderYtdl"
+  <ytdlOptionsWizard ref="ytdlWizard" />
+  <customOptions name="custom-ytdl-settings" title="Advanced yt-dlp Settings" @mounted="renderYtdl"
+    @saved="refreshYtdlWizard"
     path="/apps/mediafetch/personal/ytdl/save" :validOptions="ytdlOptions">
     <template #save>Save yt-dlp Settings</template>
   </customOptions>
@@ -39,6 +40,9 @@ export default {
     ytdlOptionsWizard,
   },
   methods: {
+    refreshYtdlWizard() {
+      if (this.$refs.ytdlWizard) this.$refs.ytdlWizard.reload();
+    },
     renderAria2(event, $vm) {
       helper
         .httpClient(helper.generateUrl("/apps/mediafetch/personal/aria2/get"))
