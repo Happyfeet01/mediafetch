@@ -9,6 +9,7 @@ use OCA\NCDownloader\Files\MediaImporter;
 use OCA\NCDownloader\Tools\Helper;
 use OCA\NCDownloader\Ytdl\Ytdl;
 use OCA\NCDownloader\Ytdl\DownloadPresets;
+use OCA\NCDownloader\Ytdl\MetadataRules;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IL10N;
@@ -139,6 +140,15 @@ class YtdlController extends Controller
         }
 
         $url = trim($url);
+
+        // Old saved settings may predate save-time validation. Catch malformed
+        // --parse-metadata before spawning yt-dlp so users get actionable
+        // feedback instead of a long raw command-line usage error.
+        $savedMetadataRule = (new Settings($this->uid))->getYtdl()['parse-metadata'] ?? null;
+        if ($savedMetadataRule !== null && !MetadataRules::validParseMetadata($savedMetadataRule)) {
+            return new JSONResponse(['error' => MetadataRules::message()], 400);
+        }
+
         $yt = $this->ytdl;
 
         if ($preset !== DownloadPresets::PERSONAL) {
