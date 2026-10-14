@@ -191,5 +191,7 @@ OC.L10N.register("mediafetch", {
   "No custom options": "Keine benutzerdefinierten Optionen",
   "Additional yt-dlp parameters": "Zusätzliche yt-dlp-Parameter",
   "Edit additional yt-dlp options only when needed. These are the same saved settings as in the graphical assistant.": "Nur bei Bedarf weitere yt-dlp-Optionen bearbeiten. Hier gelten dieselben gespeicherten Einstellungen wie im grafischen Assistenten.",
-  "MediaFetch could not load. Please reload the page and check the browser console or Nextcloud logs if this persists.": "MediaFetch konnte nicht geladen werden. Bitte lade die Seite neu. Wenn der Fehler bleibt, prüfe die Browserkonsole oder die Nextcloud-Protokolle."
+  "MediaFetch could not load. Please reload the page and check the browser console or Nextcloud logs if this persists.": "MediaFetch konnte nicht geladen werden. Bitte lade die Seite neu. Wenn der Fehler bleibt, prüfe die Browserkonsole oder die Nextcloud-Protokolle.",
+  "Could not save settings.": "Einstellungen konnten nicht gespeichert werden.",
+  "Could not load current settings.": "Aktuelle Einstellungen konnten nicht geladen werden."
 }, "nplurals=2; plural=(n != 1);");
