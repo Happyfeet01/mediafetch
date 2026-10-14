@@ -73,12 +73,24 @@ class Application extends App implements IBootstrap
         $container->registerService(Aria2::class, function (ContainerInterface $c) use ($uid) {
             $settings = new Settings($uid);
             $options = [];
-            $options['seed_time'] = $settings->get('ncd_seed_time');
-            $options['seed_ratio'] = $settings->get('ncd_seed_ratio');
+            $seedTime = $settings->get('ncd_seed_time');
+            $seedRatio = $settings->get('ncd_seed_ratio');
+            if ($seedTime !== null && (string) $seedTime !== '') {
+                $options['seed-time'] = (string) $seedTime;
+            }
+            if ($seedRatio !== null && (string) $seedRatio !== '') {
+                $options['seed-ratio'] = (string) $seedRatio;
+            }
 
             $customSettings = $settings->getAria2();
             if (is_array($customSettings)) {
-                $options = array_merge($customSettings, $options);
+                $options = array_merge($options, $customSettings);
+            }
+
+            // Per-task aria2 RPC option. Completes torrent without further
+            // seeding, but DOES NOT prevent uploads during the download.
+            if ((string) $settings->get('ncd_stop_seeding', '0') === '1') {
+                $options['seed-time'] = '0';
             }
 
             $proxy = $settings->get('ncd_download_proxy');
