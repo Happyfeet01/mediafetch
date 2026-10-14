@@ -186,7 +186,7 @@ class SettingsController extends Controller
             return new JSONResponse([
                 'error' => MetadataRules::message(),
                 'status' => false,
-            ], 400);
+            ]);
         }
 
         if (isset($data['output'])) {
