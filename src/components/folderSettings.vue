@@ -3,7 +3,7 @@
     type="button"
     @click="handler"
     class="downloader-folder-settings"
-    data-tippy-content="Set Download Folder"
+    :data-tippy-content="title"
     :data-path="path"
     :title="title"
     :aria-label="title"
