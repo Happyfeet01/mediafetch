@@ -35,14 +35,17 @@ class InternetArchive extends searchBase implements searchInterface
             . ' AND format:"Archive BitTorrent"';
 
         try {
-            $response = $this->client->request('GET', self::API_URL, [
-                'query' => [
-                    'q' => $query,
-                    'rows' => 20,
-                    'page' => 1,
-                    'output' => 'json',
-                    'fl[]' => ['identifier', 'title', 'date'],
-                ],
+            // Advanced Search needs repeated fl[] query parameters. Passing
+            // an array under a literal "fl[]" key would generate nested
+            // fl[][] parameters, which the Archive API does not expect.
+            $queryString = http_build_query([
+                'q' => $query,
+                'rows' => 20,
+                'page' => 1,
+                'output' => 'json',
+            ], '', '&', PHP_QUERY_RFC3986);
+            $queryString .= '&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=date';
+            $response = $this->client->request('GET', self::API_URL . '?' . $queryString, [
                 'timeout' => 15,
             ]);
             $json = $response->toArray();
