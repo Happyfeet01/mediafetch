@@ -1,34 +1,33 @@
 <template>
   <div class="section mediafetch-ytdlp-builder">
-    <h3>yt-dlp configuration assistant</h3>
-    <p>Configure common options visually. All settings apply to your personal yt-dlp downloads.
-      Advanced options remain available below.</p>
+    <h3>{{ tr('yt-dlp configuration assistant') }}</h3>
+    <p>{{ tr('Configure common options visually. All settings apply to your personal yt-dlp downloads. Advanced options remain available below.') }}</p>
 
-    <div v-if="loading">Loading current settings…</div>
+    <div v-if="loading">{{ tr('Loading current settings…') }}</div>
     <div v-else>
       <div class="mediafetch-builder-grid">
         <label>
           Quick preset
           <select v-model="preset" @change="applyPreset">
-            <option value="">Custom / current settings</option>
-            <option value="music">Music: MP3, metadata and cover</option>
-            <option value="audio">Audio: M4A</option>
-            <option value="video">Video: up to 1080p</option>
+            <option value="">{{ tr('Custom / current settings') }}</option>
+            <option value="music">{{ tr('Music: MP3, metadata and cover') }}</option>
+            <option value="audio">{{ tr('Audio: M4A') }}</option>
+            <option value="video">{{ tr('Video: up to 1080p') }}</option>
           </select>
         </label>
         <label>
           Download playlists
           <select v-model="playlistMode">
-            <option value="auto">Use yt-dlp default</option>
-            <option value="yes">Entire playlist</option>
-            <option value="no">Single item only</option>
+            <option value="auto">{{ tr('Use yt-dlp default') }}</option>
+            <option value="yes">{{ tr('Entire playlist') }}</option>
+            <option value="no">{{ tr('Single item only') }}</option>
           </select>
         </label>
         <label>
           Audio extraction / conversion
           <select v-model="audioMode">
-            <option value="">No audio extraction</option>
-            <option value="best">Audio only (best available)</option>
+            <option value="">{{ tr('No audio extraction') }}</option>
+            <option value="best">{{ tr('Audio only (best available)') }}</option>
             <option value="mp3">MP3</option>
             <option value="m4a">M4A</option>
             <option value="opus">Opus</option>
@@ -39,19 +38,19 @@
         <label v-if="audioMode">
           Audio conversion quality
           <select v-model="audioQuality">
-            <option value="">yt-dlp default</option>
-            <option value="0">Highest VBR quality (0)</option>
-            <option value="5">Medium VBR quality (5)</option>
-            <option value="9">Lowest VBR quality (9)</option>
+            <option value="">{{ tr('yt-dlp default') }}</option>
+            <option value="0">{{ tr('Highest VBR quality (0)') }}</option>
+            <option value="5">{{ tr('Medium VBR quality (5)') }}</option>
+            <option value="9">{{ tr('Lowest VBR quality (9)') }}</option>
           </select>
         </label>
         <label>
           Video format / quality
           <select v-model="videoMode">
-            <option value="">Use existing downloader defaults</option>
-            <option value="1080">Up to 1080p</option>
-            <option value="720">Up to 720p</option>
-            <option value="custom">Custom format expression</option>
+            <option value="">{{ tr('Use existing downloader defaults') }}</option>
+            <option value="1080">{{ tr('Up to 1080p') }}</option>
+            <option value="720">{{ tr('Up to 720p') }}</option>
+            <option value="custom">{{ tr('Custom format expression') }}</option>
           </select>
         </label>
         <label v-if="videoMode === 'custom'">
@@ -61,7 +60,7 @@
         <label>
           Container after merging video streams
           <select v-model="mergeFormat">
-            <option value="">yt-dlp default</option>
+            <option value="">{{ tr('yt-dlp default') }}</option>
             <option value="mp4">MP4</option>
             <option value="mkv">MKV</option>
             <option value="webm">WebM</option>
@@ -70,7 +69,7 @@
       </div>
 
       <fieldset>
-        <legend>Metadata and subtitles</legend>
+        <legend>{{ tr('Metadata and subtitles') }}</legend>
         <label><input v-model="embedMetadata" type="checkbox" /> Embed available metadata</label>
         <label><input v-model="embedThumbnail" type="checkbox" /> Embed thumbnail / cover</label>
         <label><input v-model="writeSubs" type="checkbox" /> Download subtitles</label>
@@ -98,20 +97,18 @@
       </div>
 
       <details>
-        <summary>Preview yt-dlp options</summary>
+        <summary>{{ tr('Preview yt-dlp options') }}</summary>
         <code class="mediafetch-builder-preview">{{ commandPreview }}</code>
-        <p>These are persistent user settings, not a separate per-download command.
-          The format dropdown in the download form can override conversion choices.</p>
+        <p>{{ tr('These are persistent user settings, not a separate per-download command. The format dropdown in the download form can override conversion choices.') }}</p>
       </details>
 
       <div class="mediafetch-builder-actions">
         <button type="button" :disabled="saving" @click="save">
-          {{ saving ? 'Saving…' : 'Save yt-dlp settings' }}
+          {{ saving ? tr('Saving…') : tr('Save yt-dlp settings') }}
         </button>
-        <button type="button" :disabled="saving" @click="reload">Discard changes</button>
+        <button type="button" :disabled="saving" @click="reload">{{ tr('Discard changes') }}</button>
       </div>
-      <p class="mediafetch-builder-note">Unknown / advanced safe parameters are kept when saving.
-        To edit them, use the advanced option list below.</p>
+      <p class="mediafetch-builder-note">{{ tr('Unknown / advanced safe parameters are kept when saving. To edit them, use the advanced option list below.') }}</p>
     </div>
   </div>
 </template>
@@ -196,6 +193,7 @@ export default {
     },
   },
   methods: {
+    tr(message) { return helper.t(message) },
     reload() {
       this.loading = true
       helper.httpClient(helper.generateUrl('/apps/mediafetch/personal/ytdl/get'))
@@ -206,7 +204,7 @@ export default {
         })
         .setErrorHandler(() => {
           this.loading = false
-          helper.error('Could not load yt-dlp settings.')
+          helper.error(this.tr('Could not load yt-dlp settings.'))
         })
         .send()
     },
@@ -256,11 +254,11 @@ export default {
       if (this.saving) return
       if (this.filenameTemplate &&
           (this.filenameTemplate.includes('..') || /[/\\\0]/.test(this.filenameTemplate))) {
-        helper.error('Filename template must not contain a directory or "..".')
+        helper.error(this.tr('Filename template must not contain a directory or "..".'))
         return
       }
       if (this.retries !== '' && (!/^\d+$/.test(String(this.retries)))) {
-        helper.error('Retries must be a non-negative whole number.')
+        helper.error(this.tr('Retries must be a non-negative whole number.'))
         return
       }
       this.saving = true
@@ -269,17 +267,17 @@ export default {
         .setHandler((response) => {
           this.saving = false
           if (!response || response.error) {
-            helper.error(response?.error || 'Could not save yt-dlp settings.')
+            helper.error(response?.error || this.tr('Could not save yt-dlp settings.'))
             return
           }
-          helper.info('yt-dlp settings saved.')
+          helper.info(this.tr('yt-dlp settings saved.'))
           // The existing advanced editor reads its own copy at mount time.
           // Reload so both editors show exactly the same stored settings.
           window.location.reload()
         })
         .setErrorHandler(() => {
           this.saving = false
-          helper.error('Could not save yt-dlp settings.')
+          helper.error(this.tr('Could not save yt-dlp settings.'))
         })
         .send()
     },
