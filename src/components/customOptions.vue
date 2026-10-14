@@ -1,7 +1,7 @@
 <template>
   <div class="section" :class="[classes]" :id="container">
     <h3 class="title">{{ title }}</h3>
-    <div classs="button-container" :id="id" :path="path">
+    <div class="mediafetch-options-editor" :id="id" :path="path">
       <editableRow
         v-for="(option, key) in rows"
         v-bind:key="key"
