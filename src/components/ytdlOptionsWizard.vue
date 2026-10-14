@@ -94,12 +94,17 @@
           {{ tr('Filename template (optional, filename only)') }}
           <input v-model.trim="filenameTemplate" type="text" placeholder="%(title)s.%(ext)s" />
         </label>
+        <label class="mediafetch-builder-wide">
+          {{ tr('Artist and title parsing rule (optional)') }}
+          <input v-model.trim="parseMetadata" type="text" placeholder="%(title)s:(?P<artist>.+?) - (?P<title>.+)" />
+          <span class="mediafetch-builder-help">{{ tr('Use FROM:TO, e.g. to read Artist - Title from a video title. Filename patterns belong in the field above.') }}</span>
+        </label>
       </div>
 
       <details>
         <summary>{{ tr('Preview yt-dlp options') }}</summary>
         <code class="mediafetch-builder-preview">{{ commandPreview }}</code>
-        <p>{{ tr('These are persistent user settings, not a separate per-download command. The format dropdown in the download form can override conversion choices.') }}</p>
+        <p>{{ tr('These are persistent user settings, not a separate per-download command. The per-download profile in the main form may override these choices for one download.') }}</p>
       </details>
 
       <div class="mediafetch-builder-actions">
@@ -147,6 +152,7 @@ export default {
       limitRate: '',
       retries: '',
       filenameTemplate: '',
+      parseMetadata: '',
     }
   },
   computed: {
@@ -178,6 +184,7 @@ export default {
       if (this.limitRate) options['limit-rate'] = this.limitRate
       if (this.retries !== '') options.retries = String(this.retries)
       if (this.filenameTemplate) options.output = this.filenameTemplate
+      if (this.parseMetadata) options['parse-metadata'] = this.parseMetadata
       return options
     },
     commandPreview() {
@@ -223,6 +230,7 @@ export default {
       this.limitRate = values['limit-rate'] || ''
       this.retries = values.retries === undefined ? '' : String(values.retries)
       this.filenameTemplate = values.output || ''
+      this.parseMetadata = values['parse-metadata'] || ''
     },
     applyPreset() {
       if (this.preset === 'music') {
@@ -251,6 +259,13 @@ export default {
           (this.filenameTemplate.includes('..') || /[/\\\0]/.test(this.filenameTemplate))) {
         helper.error(this.tr('Filename template must not contain a directory or "..".'))
         return
+      }
+      if (this.parseMetadata) {
+        const separator = this.parseMetadata.indexOf(':')
+        if (separator < 1 || separator >= this.parseMetadata.length - 1) {
+          helper.error(this.tr('Metadata parsing needs FROM:TO. Put filename templates in the Filename template field.'))
+          return
+        }
       }
       if (this.retries !== '' && (!/^\d+$/.test(String(this.retries)))) {
         helper.error(this.tr('Retries must be a non-negative whole number.'))
@@ -340,6 +355,12 @@ export default {
 
   .mediafetch-builder-wide {
     grid-column: 1 / -1;
+  }
+
+  .mediafetch-builder-help {
+    color: var(--color-text-maxcontrast);
+    font-size: 13px;
+    line-height: 1.45;
   }
 
   details {
