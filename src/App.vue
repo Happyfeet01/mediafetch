@@ -103,7 +103,7 @@ export default {
       let startYtdlPolling = false;
 
       if (!helper.isURL(inputValue) && !helper.isMagnetURI(inputValue)) {
-        helper.error(t(APP_ID, inputValue + " is Invalid"));
+        helper.error(t(APP_ID, "Invalid URL or magnet link: {value}", { value: inputValue }));
         return;
       }
 
