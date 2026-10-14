@@ -208,7 +208,13 @@
     "Stop seeding after the download completes": "Seeding nach dem Download stoppen",
     "When enabled, aria2 stops seeding completed torrents (seed-time=0). Pieces may still be uploaded while downloading. This does not change existing torrents.": "Bei aktivierter Option stoppt aria2 das Seeding nach Downloadabschluss (seed-time=0). Während des Downloads können weiterhin Dateiteile hochgeladen werden. Bereits laufende Torrents bleiben unverändert.",
     "Torrent seeding preference saved.": "Seeding-Einstellung gespeichert.",
-    "Could not save torrent seeding preference.": "Seeding-Einstellung konnte nicht gespeichert werden."
+    "Could not save torrent seeding preference.": "Seeding-Einstellung konnte nicht gespeichert werden.",
+    "Artist and title parsing rule (optional)": "Regel zum Auslesen von Künstler und Titel (optional)",
+    "Use FROM:TO, e.g. to read Artist - Title from a video title. Filename patterns belong in the field above.": "Format QUELLE:REGEL verwenden, z. B. um „Künstler - Titel“ aus einem Videotitel auszulesen. Dateinamenvorlagen gehören in das Feld darüber.",
+    "Metadata parsing needs FROM:TO. Put filename templates in the Filename template field.": "Beim Auslesen von Metadaten muss QUELLE:REGEL verwendet werden. Dateinamenvorlagen gehören in das Feld „Dateinamenvorlage“.",
+    "The per-download profile in the main form may override these choices for one download.": "Das Download-Profil auf der Hauptseite kann diese Einstellungen für einen einzelnen Download überschreiben.",
+    "These are persistent user settings, not a separate per-download command. The per-download profile in the main form may override these choices for one download.": "Diese Einstellungen werden dauerhaft für den Nutzer gespeichert. Ein Download-Profil auf der Hauptseite kann sie für einen einzelnen Download überschreiben.",
+    "Invalid parse-metadata option: use FROM:TO, for example %(title)s:(?P<artist>.+?) - (?P<title>.+). Filename templates belong in the output option.": "Ungültige parse-metadata-Einstellung: QUELLE:REGEL verwenden, z. B. %(title)s:(?P<artist>.+?) - (?P<title>.+). Dateinamenvorlagen gehören in die Einstellung output."
   },
   "pluralForm": "nplurals=2; plural=(n != 1);"
 }
