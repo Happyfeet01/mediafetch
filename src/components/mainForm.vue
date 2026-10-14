@@ -2,7 +2,7 @@
   <form class="main-form" id="nc-vue-unified-form" :action="path">
     <div class="downloader-ip">
       <button type="button" :disabled="ipLoading" @click="checkIp">
-        {{ ipLoading ? 'IP wird geprüft …' : 'Downloader-IP prüfen' }}
+        {{ ipLoading ? tr('Checking IP…') : tr('Check downloader IP') }}
       </button>
       <span role="status">{{ ipStatus }}</span>
     </div>
@@ -32,12 +32,12 @@
         <div class="download-controls-container">
           <div v-if="checkboxes" id="select-value-extension-container">
             <select :value="selectedExt" id="select-value-extension">
-              <option id="defaultext" value="defaultext">Default</option>
-              <optgroup label="Video">
+              <option id="defaultext" value="defaultext">{{ tr('Default') }}</option>
+              <optgroup :label="tr('Video')">
                 <option id="mp4" value="mp4">mp4</option>
                 <option id="webm" value="webm">webm</option>
               </optgroup>
-              <optgroup label="Audio">
+              <optgroup :label="tr('Audio')">
                 <option id="m4a" value="m4a">m4a</option>
                 <option id="mp3" value="mp3">mp3</option>
                 <option id="vorbis" value="vorbis">vorbis</option>
@@ -82,7 +82,7 @@ export default {
   data() {
     return {
       ipLoading: false,
-      ipStatus: 'Noch nicht geprüft',
+      ipStatus: t(APP_ID, 'Not checked yet'),
       checkedValue: false,
       path: this.uris.aria2_url,
       dlPath: this.settings.settings.ncd_downloader_dir,
@@ -104,25 +104,26 @@ export default {
     folderSettings,
   },
   methods: {
+    tr(message) { return t(APP_ID, message); },
     checkIp() {
       this.ipLoading = true;
-      this.ipStatus = 'Prüfung läuft …';
+      this.ipStatus = t(APP_ID, 'Checking…');
       helper.httpClient(helper.generateUrl('/apps/mediafetch/aria2/external-ip'))
         .setMethod('GET')
         .setHandler((data) => {
           this.ipLoading = false;
           this.ipStatus = data.ip
-            ? `Externe Downloader-IP: ${data.ip} (Stand: ${new Date(data.checkedAt).toLocaleTimeString()})`
-            : 'IP unbekannt – Prüfung fehlgeschlagen';
+            ? t(APP_ID, 'External downloader IP: {ip} (as of {time})', { ip: data.ip, time: new Date(data.checkedAt).toLocaleTimeString() })
+            : t(APP_ID, 'Unknown IP – check failed');
         })
         .setErrorHandler((xhr) => {
           this.ipLoading = false;
-          let detail = xhr?.status ? `HTTP ${xhr.status}` : 'Netzwerkfehler';
+          let detail = xhr?.status ? `HTTP ${xhr.status}` : t(APP_ID, 'Network error');
           try {
             const response = JSON.parse(xhr.responseText);
             if (response.error) detail = response.error;
           } catch (_) { /* Non-JSON responses still show the HTTP status. */ }
-          this.ipStatus = `IP unbekannt – ${detail}`;
+          this.ipStatus = t(APP_ID, 'Unknown IP – {detail}', { detail });
         }).send();
     },
     whichType(type, event) {
@@ -162,7 +163,7 @@ export default {
       }
     },
     noOptions() {
-      return [{ name: "nooptions", label: "No Options" }];
+      return [{ name: "nooptions", label: t(APP_ID, "No Options") }];
     },
   },
   name: "mainForm",
