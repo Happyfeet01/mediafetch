@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/../lib/Ytdl/DownloadPresets.php';
+require __DIR__ . '/../lib/Ytdl/MetadataRules.php';
 require __DIR__ . '/../lib/Ytdl/Ytdl.php';
 
 use OCA\NCDownloader\Ytdl\DownloadPresets;
@@ -26,6 +27,16 @@ function templateOf(Ytdl $yt): string
     $prop = new ReflectionProperty(Ytdl::class, 'outTpl');
     return $prop->getValue($yt);
 }
+
+// A filename template in --parse-metadata caused yt-dlp to abort before
+// any YouTube Music album could be processed.
+verify(\OCA\NCDownloader\Ytdl\MetadataRules::validParseMetadata('%(title)s:(?P<artist>.+?) - (?P<title>.+)'),
+    'Valid yt-dlp FROM:TO parser rejected');
+verify(!\OCA\NCDownloader\Ytdl\MetadataRules::validParseMetadata(
+    '%(playlist_index,track_number&{} - |)s%(artist,creator,uploader|Unbekannt)s - %(title)s.%(ext)s'
+), 'An output filename template was incorrectly accepted as parse-metadata');
+verify(!\OCA\NCDownloader\Ytdl\MetadataRules::validParseMetadata(''),
+    'An empty parse-metadata rule was incorrectly accepted');
 
 $saved = [
     'convert-thumbnails' => '', // This used to swallow --parse-metadata.
