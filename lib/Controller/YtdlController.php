@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 class YtdlController extends Controller
 {
     private $l10n;
-    private $audio_extensions = array("mp3", "m4a", "vorbis");
+    private $audio_extensions = array("mp3", "m4a", "vorbis", "opus", "flac", "best");
     private $video_extensions = array("mp4", "webm", "mkv");
     private $uid;
     private $downloadDir;
@@ -136,9 +136,9 @@ class YtdlController extends Controller
         // always takes precedence over personal settings.
         if ($extension === '') {
             $personalOptions = (new Settings($this->uid))->getYtdl();
-            $preferredAudio = (string) ($personalOptions['audio-format'] ?? 'm4a');
+            $preferredAudio = (string) ($personalOptions['audio-format'] ?? 'best');
             $extension = isset($personalOptions['extract-audio'])
-                ? (in_array($preferredAudio, $this->audio_extensions, true) ? $preferredAudio : 'm4a')
+                ? (in_array($preferredAudio, $this->audio_extensions, true) ? $preferredAudio : 'best')
                 : 'mp4';
         }
         if (!$url || !is_string($url)) {
