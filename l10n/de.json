@@ -180,7 +180,16 @@
     "Invalid proxy address URL": "Ungültige Proxy-Adresse",
     "Invalid Aria address URL": "Ungültige Aria-Adresse",
     "Download started": "Download gestartet",
-    "No Torrent Files": "Keine Torrent-Dateien"
+    "No Torrent Files": "Keine Torrent-Dateien",
+    "e.g. 2M": "z. B. 2M",
+    "Adding to Nextcloud…": "Wird zu Nextcloud hinzugefügt…",
+    "Downloading…": "Wird heruntergeladen…",
+    "FAILED!": "FEHLGESCHLAGEN!",
+    "Invalid url": "Ungültige URL",
+    "No torrents available": "Keine Torrents verfügbar",
+    "Search failed": "Suche fehlgeschlagen",
+    "Refused to stop stale PID %d because it no longer looks like yt-dlp.": "Veraltete PID %d wurde nicht beendet, da sie offenbar nicht mehr zu yt-dlp gehört.",
+    "No custom options": "Keine benutzerdefinierten Optionen"
   },
   "pluralForm": "nplurals=2; plural=(n != 1);"
 }
