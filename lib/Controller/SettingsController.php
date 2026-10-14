@@ -17,6 +17,7 @@ class SettingsController extends Controller
         'ncd_seed_ratio',
         'ncd_seed_time_unit',
         'ncd_seed_time',
+        'ncd_stop_seeding',
         'ncd_download_proxy',
         'ncd_hide_errors',
     ];
