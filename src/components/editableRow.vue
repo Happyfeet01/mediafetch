@@ -6,13 +6,14 @@
       :id="name"
       :name="name"
       :value="value"
-      placeholder="Leave empty if no value needed"
+      :placeholder="tr('Leave empty if no value needed')"
       class="form-input-text"
     />
     <button class="has-content icon-close" @click="remove"></button>
   </div>
 </template>
 <script>
+import { translate as t } from "@nextcloud/l10n";
 export default {
   name: "editableRow",
   props: {
@@ -24,6 +25,7 @@ export default {
     return {};
   },
   methods: {
+    tr(message) { return t("mediafetch", message); },
     remove(e) {
       let ele = e.target;
       let container = ele.closest("div");
