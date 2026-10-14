@@ -277,7 +277,7 @@ export default {
         .setHandler((response) => {
           this.saving = false
           if (!response || response.error) {
-            helper.error(response?.error || this.tr('Could not save yt-dlp settings.'))
+            helper.error(response?.error ? this.tr(response.error) : this.tr('Could not save yt-dlp settings.'))
             return
           }
           helper.info(this.tr('yt-dlp settings saved.'))
