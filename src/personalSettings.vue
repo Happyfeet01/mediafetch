@@ -1,18 +1,18 @@
 <template>
   <div class="section ncdownloader-general-settings">
-    <h3>General Settings</h3>
+    <h3>{{ tr('General Settings') }}</h3>
     <settingsRow v-for="(option, key) in optionRows" v-bind:key="key" :value="option.value" :id="option.id"
-      :label="option.label" :placeholder="option.placeholder" :path="option.path" :useBtn="true" />
+      :label="tr(option.label)" :placeholder="option.placeholder" :path="option.path" :useBtn="true" />
   </div>
-  <customOptions v-if="!disallowAria2Settings || isAdmin" name="custom-aria2-settings" title="Personal Aria2 Settings"
+  <customOptions v-if="!disallowAria2Settings || isAdmin" name="custom-aria2-settings"  :title="tr('Personal Aria2 Settings')"
     @mounted="renderAria2" path="/apps/mediafetch/personal/aria2/save" :validOptions="aria2Options">
-    <template #save>Save Aria2 Settings</template>
+    <template #save>{{ tr('Save Aria2 Settings') }}</template>
   </customOptions>
   <ytdlOptionsWizard ref="ytdlWizard" />
-  <customOptions name="custom-ytdl-settings" title="Advanced yt-dlp Settings" @mounted="renderYtdl"
+  <customOptions name="custom-ytdl-settings"  :title="tr('Advanced yt-dlp Settings')" @mounted="renderYtdl"
     @saved="refreshYtdlWizard"
     path="/apps/mediafetch/personal/ytdl/save" :validOptions="ytdlOptions">
-    <template #save>Save yt-dlp Settings</template>
+    <template #save>{{ tr('Save yt-dlp Settings') }}</template>
   </customOptions>
 </template>
 <script>
@@ -40,6 +40,7 @@ export default {
     ytdlOptionsWizard,
   },
   methods: {
+    tr(message) { return helper.t(message); },
     refreshYtdlWizard() {
       if (this.$refs.ytdlWizard) this.$refs.ytdlWizard.reload();
     },
