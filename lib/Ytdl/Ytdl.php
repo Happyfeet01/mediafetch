@@ -14,6 +14,7 @@ class Ytdl
     private $format = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
     private $options = [];
     private array $personalSettings = [];
+    private string $downloadPreset = DownloadPresets::PERSONAL;
 
     // Only these yt-dlp options are switches without a following argument.
     // A missing value on a value-taking option must not swallow the next
@@ -104,6 +105,7 @@ class Ytdl
         }
 
         $this->configureDownloadOptions(DownloadPresets::apply($this->personalSettings, $preset));
+        $this->downloadPreset = $preset;
         $this->videoFormat = null; // Presets select/merge rather than re-encode videos.
         $this->audioOnly = DownloadPresets::isMusic($preset);
         if ($this->audioOnly) {
@@ -144,7 +146,9 @@ class Ytdl
     public function audioMode()
     {
         if (Helper::ffmpegInstalled()) {
-            $this->addOption('--extract-audio');
+            if ($this->hasOption('--extract-audio') === false) {
+                $this->addOption('--extract-audio');
+            }
         } else {
             $this->audioFormat = "m4a";
         }
@@ -228,7 +232,7 @@ class Ytdl
         $this->setUrl($url);
         $this->prependOption($this->bin);
 
-        $data = ['link' => $url, 'path' => $this->dbDlPath];
+        $data = ['link' => $url, 'path' => $this->dbDlPath, 'preset' => $this->downloadPreset];
         if ($this->audioOnly) {
             $data['ext'] = $this->audioFormat;
         } else {
