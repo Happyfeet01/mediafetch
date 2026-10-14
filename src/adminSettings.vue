@@ -1,16 +1,16 @@
 <template>
   <div class="section">
     <settingsRow v-for="(option, key) in optionRows" v-bind:key="key" :value="option.value" :id="option.id"
-      :label="option.label" :placeholder="option.placeholder" :path="option.path" />
+      :label="tr(option.label)" :placeholder="option.placeholder" :path="option.path" />
   </div>
   <div class="section">
-    <toggleButton :defaultStatus="pStatus" disabledText="No Aria2 Settings for non-admin Users"
-      enabledText="No Aria2 Settings for non-admin Users" @changed="toggle" name="disallow_aria2_settings">
+    <toggleButton :defaultStatus="pStatus"  :disabledText="tr('No Aria2 Settings for non-admin Users')"
+       :enabledText="tr('No Aria2 Settings for non-admin Users')" @changed="toggle" name="disallow_aria2_settings">
     </toggleButton>
   </div>
-  <customOptions name="admin-aria2-settings" @mounted="render" title="Global Aria2 Settings"
+  <customOptions name="admin-aria2-settings" @mounted="render"  :title="tr('Global Aria2 Settings')"
     path="/apps/mediafetch/admin/aria2/save" :validOptions="validOptions">
-    <template #save>Save Settings</template>
+    <template #save>{{ tr('Save Settings') }}</template>
   </customOptions>
   <systemInfo :aria2Version="aria2Version" :ytdVersion="ytdVersion" />
 </template>
@@ -41,6 +41,7 @@ export default {
     systemInfo,
   },
   methods: {
+    tr(message) { return helper.t(message); },
     toggle(name, value) {
       let data = {};
       data[name] = value ? 1 : 0;
