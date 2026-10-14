@@ -84,7 +84,7 @@
       <div class="mediafetch-builder-grid">
         <label>
           {{ tr('Speed limit (optional)') }}
-          <input v-model.trim="limitRate" type="text" placeholder="e.g. 2M" />
+          <input v-model.trim="limitRate" type="text" :placeholder="tr('e.g. 2M')" />
         </label>
         <label>
           {{ tr('Retries (optional)') }}
@@ -189,7 +189,7 @@ export default {
       return Object.entries(this.options)
         .filter(([key]) => safeYtdlOptions.includes(key))
         .map(([key, value]) => '--' + key + (value === '' ? '' : ' ' + JSON.stringify(String(value))))
-        .join(' ') || '(No custom yt-dlp settings)'
+        .join(' ') || this.tr('(No custom yt-dlp settings)')
     },
   },
   methods: {
