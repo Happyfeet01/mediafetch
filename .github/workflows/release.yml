@@ -1,0 +1,119 @@
+name: Publish MediaFetch GitHub release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'appinfo/info.xml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mediafetch-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'Happyfeet01/mediafetch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify matching app and package versions
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_VERSION="$(php -r 'echo (string) simplexml_load_file("appinfo/info.xml")->version;')"
+          PKG_VERSION="$(node -p 'require("./package.json").version')"
+          test -n "$APP_VERSION"
+          test "$APP_VERSION" = "$PKG_VERSION"
+          echo "version=$APP_VERSION" >> "$GITHUB_OUTPUT"
+          echo "version=$APP_VERSION" >> "$GITHUB_ENV"
+
+      - name: Avoid duplicate GitHub releases
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          if gh release view "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo 'exists=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'exists=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install PHP 8.4
+        if: steps.existing.outputs.exists != 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install production PHP dependencies
+        if: steps.existing.outputs.exists != 'true'
+        run: composer install --no-interaction --prefer-dist --no-progress --no-dev --optimize-autoloader
+
+      - name: Validate PHP and bundled search/download regressions
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          find appinfo lib templates -name '*.php' -type f -print0 | xargs -0 -n1 php -l >/dev/null
+          php tests/downloader-ip.php
+          php tests/yt-dlp-presets.php
+          php tests/search-providers.php
+          php tests/index-template.php
+
+      - name: Install Node.js 20
+        if: steps.existing.outputs.exists != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build frontend and verify translations
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          node tests/l10n.cjs
+          node tests/torrent-search-actions.cjs
+          npm run build
+          test -s js/app.js
+          test -s js/appSettings.js
+
+      - name: Package built MediaFetch for GitHub
+        if: steps.existing.outputs.exists != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/mediafetch-github-release/mediafetch
+          rsync -a ./ /tmp/mediafetch-github-release/mediafetch/ \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='src' \
+            --exclude='tests' \
+            --exclude='dist' \
+            --exclude='package-lock.json' \
+            --exclude='*.map'
+          tar -czf "mediafetch-${version}.tar.gz" -C /tmp/mediafetch-github-release mediafetch
+          sha256sum "mediafetch-${version}.tar.gz" > "mediafetch-${version}.tar.gz.sha256"
+
+      - name: Publish v${{ steps.version.outputs.version }} on GitHub
+        if: steps.existing.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "v${version}" \
+            "mediafetch-${version}.tar.gz" \
+            "mediafetch-${version}.tar.gz.sha256" \
+            --target "$GITHUB_SHA" \
+            --title "MediaFetch ${version}" \
+            --notes-file "docs/releases/2.0.0.md" \
+            --latest
