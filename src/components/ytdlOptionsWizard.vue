@@ -12,7 +12,7 @@
           <select v-model="preset" @change="applyPreset">
             <option value="">Custom / current settings</option>
             <option value="music">Music: MP3, metadata and cover</option>
-            <option value="audio">Audio: M4A, original quality</option>
+            <option value="audio">Audio: M4A</option>
             <option value="video">Video: up to 1080p</option>
           </select>
         </label>
@@ -32,6 +32,7 @@
             <option value="mp3">MP3</option>
             <option value="m4a">M4A</option>
             <option value="opus">Opus</option>
+            <option value="vorbis">Vorbis</option>
             <option value="flac">FLAC</option>
           </select>
         </label>
@@ -119,8 +120,8 @@
 import helper from '../utils/helper'
 import safeYtdlOptions from '../utils/safeYtdlOptions'
 
-const format1080 = 'bv*[height<=1080]+ba/b[height<=1080]/b'
-const format720 = 'bv*[height<=720]+ba/b[height<=720]/b'
+const format1080 = 'bv*[height<=1080]+ba/b[height<=1080]'
+const format720 = 'bv*[height<=720]+ba/b[height<=720]'
 const has = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key)
 
 const managedKeys = [
