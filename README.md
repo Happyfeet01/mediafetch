@@ -191,6 +191,17 @@ The existing search dropdown lists the bundled providers, including The Pirate B
 - Academic Torrents uses its officially published `database.xml` feed, cached in Nextcloud's app data for 24 hours to avoid scraping and repeat downloads. The XMLReader PHP extension is required. If the provider is unavailable, other search sources are unaffected.
 - Provider availability, search results, torrent health, and content rights are not guaranteed. Search results are third-party data. BitTorrent can upload pieces while downloading; users must determine whether their use complies with applicable laws and licenses.
 
+## Languages
+
+MediaFetch 2.0 uses the Nextcloud account language in its navigation, download/search controls, administrator settings, personal settings and graphical yt-dlp assistant.
+
+- **English** is the source language and fallback.
+- **Deutsch** is provided through `l10n/de.json` and `l10n/de.js`.
+
+There is no separate app-level language switch. The language is selected in Nextcloud's personal settings. Technical tool and command-line option names (such as `aria2`, `yt-dlp` or `--embed-metadata`) are intentionally not translated.
+
+Verify the catalogs and interpolation placeholders using `node tests/l10n.cjs`. Nextcloud's own localization tooling may regenerate `l10n/*.js` from the JSON catalogs during installation and updates.
+
 ## aria2 RPC
 
 MediaFetch communicates with aria2 through its JSON-RPC interface.
