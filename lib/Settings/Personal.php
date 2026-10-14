@@ -49,6 +49,7 @@ class Personal implements ISettings
                 'ncd_seed_ratio' => $this->settings->get('ncd_seed_ratio'),
                 'ncd_seed_time_unit' => $this->settings->get('ncd_seed_time_unit'),
                 'ncd_seed_time' => $this->settings->get('ncd_seed_time'),
+                'ncd_stop_seeding' => $this->settings->get('ncd_stop_seeding', '0'),
                 'path' => $path,
                 'disallow_aria2_settings' => Helper::getAdminSettings('disallow_aria2_settings'),
                 'is_admin' => $this->isAdmin,

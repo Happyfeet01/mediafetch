@@ -1,13 +1,13 @@
 <template>
     <div class="system-info-wrapper section">
-        <h2 class="section-title">System Info</h2>
+        <h2 class="section-title">{{ tr('System Info') }}</h2>
         <div class="system-info">
             <div class="system-info-item">
-                <div class="system-info-item-label">Aria2 Version: </div>
+                <div class="system-info-item-label">{{ tr('Aria2 Version:') }}</div>
                 <div class="system-info-item-value"><span class="version">{{ aria2Ver }}</span></div>
             </div>
             <div class="system-info-item">
-                <div class="system-info-item-label">yt-dlp Version: </div>
+                <div class="system-info-item-label">{{ tr('yt-dlp Version:') }}</div>
                 <div class="system-info-item-value"><span class="version">{{ ytdVer }}</span>
                     <actionButton action="check" btnType="ytd" @clicked="checkUpdate" enableLoading="true"
                         className="check-button">{{ ytdBtn }}</actionButton>
@@ -27,7 +27,7 @@ export default {
     name: "systemInfo",
     data() {
         return {
-            ytdBtn: "Check for Update",
+            ytdBtn: helper.t("Check for Update"),
         };
     },
     components: {
@@ -47,6 +47,7 @@ export default {
         }
     },
     methods: {
+        tr(message) { return helper.t(message); },
         checkUpdate(event, $vm) {
             const { action } = $vm.$props;
             const path = action === "check" ? YTD_CHECK_URL : YTD_UPDATE_URL;
@@ -56,12 +57,12 @@ export default {
                 .setHandler((data) => {
                     $vm.loading = false;
                     if (data.status) {
-                        helper.info(data.message);
+                        helper.info(helper.t(data.message));
                         if (action === "check") {
-                            this.ytdBtn = "Update";
+                            this.ytdBtn = helper.t("Update");
                             $vm.$props.action = "update";
                         } else {
-                            this.ytdBtn = "Check for Update";
+                            this.ytdBtn = helper.t("Check for Update");
                             $vm.$props.action = "check";
                             if (data.data) {
                                 this.ytdVer = data.data;

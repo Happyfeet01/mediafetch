@@ -103,15 +103,15 @@ export default {
       let startYtdlPolling = false;
 
       if (!helper.isURL(inputValue) && !helper.isMagnetURI(inputValue)) {
-        helper.error(t(APP_ID, inputValue + " is Invalid"));
+        helper.error(t(APP_ID, "Invalid URL or magnet link: {value}", { value: inputValue }));
         return;
       }
 
       if (formData.type === "ytdl") {
-        formData["extension"] = "";
-        if (formData["select-value-extension"] !== "defaultext") {
-          formData["extension"] = formData["select-value-extension"];
-        }
+        // Only an allowlisted profile id is sent. The PHP controller owns the
+        // actual yt-dlp arguments; the user's settings remain unchanged.
+        formData.preset = formData["select-value-preset"] || "personal";
+        delete formData["select-value-preset"];
         message = helper.t("Download task started!");
         helper.setContentTableType("ytdl-downloads");
         contentTable.getInstance().loading();

@@ -26,22 +26,38 @@ window.addEventListener('DOMContentLoaded', function () {
     const bar = createApp(settingsBar)
     const dataContainer = document.getElementById(dataContainerID)
 
-    let values = {}
-    try {
-        const settings = dataContainer.getAttribute('data-settings')
-        const searchSites = dataContainer.getAttribute('data-search-sites')
-        values.settings = JSON.parse(settings)
-        values.search_sites = JSON.parse(searchSites)
-    } catch (e) {
-        values = {}
-        console.log(e)
+    const showStartupError = (error) => {
+        console.error('[MediaFetch] Startup failed:', error)
+        const target = document.getElementById(container)
+        if (!target) return
+        const message = document.createElement('p')
+        message.className = 'mediafetch-startup-error'
+        message.setAttribute('role', 'alert')
+        message.textContent = t(APP_ID, 'MediaFetch could not load. Please reload the page and check the browser console or Nextcloud logs if this persists.')
+        target.replaceChildren(message)
     }
 
-    bar.provide('settings', values.settings)
-    bar.mount('#app-settings-content')
-    app.provide('settings', values)
-    const vm = app.mount(`#${container}`)
-    helper.addVue(vm.$options.name, vm)
+    let values
+    try {
+        const settings = dataContainer?.getAttribute('data-settings')
+        const searchSites = dataContainer?.getAttribute('data-search-sites')
+        values = {
+            settings: JSON.parse(settings),
+            search_sites: JSON.parse(searchSites),
+        }
+        if (!values.settings || typeof values.settings !== 'object' ||
+            !Array.isArray(values.search_sites)) {
+            throw new Error('Invalid app configuration or search providers')
+        }
+        bar.provide('settings', values.settings)
+        bar.mount('#app-settings-content')
+        app.provide('settings', values)
+        const vm = app.mount(`#${container}`)
+        helper.addVue(vm.$options.name, vm)
+    } catch (error) {
+        showStartupError(error)
+        return
+    }
 
     // Nextcloud 34 still renders the legacy app-navigation toggle for apps
     // using #app-navigation, but no longer wires the old Snap.js behaviour.

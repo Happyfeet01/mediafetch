@@ -529,10 +529,19 @@ class Helper
         $appPath = self::getAppPath();
         $dataDir = self::getDataDir();
         $aria2Dir = $dataDir . "/aria2";
-        $options['seed_time'] = $settings->get("ncd_seed_time");
-        $options['seed_ratio'] = $settings->get("ncd_seed_ratio");
+        $seedTime = $settings->get("ncd_seed_time");
+        $seedRatio = $settings->get("ncd_seed_ratio");
+        if ($seedTime !== null && (string) $seedTime !== '') {
+            $options['seed-time'] = (string) $seedTime;
+        }
+        if ($seedRatio !== null && (string) $seedRatio !== '') {
+            $options['seed-ratio'] = (string) $seedRatio;
+        }
         if (is_array($customSettings = $settings->getAria2())) {
-            $options = array_merge($customSettings, $options);
+            $options = array_merge($options, $customSettings);
+        }
+        if ((string) $settings->get('ncd_stop_seeding', '0') === '1') {
+            $options['seed-time'] = '0';
         }
         $proxy = $settings->get("ncd_download_proxy");
         if ($proxy) {

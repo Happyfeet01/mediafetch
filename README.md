@@ -17,7 +17,8 @@ It continues the NCDownloader / Net loader codebase with support for current Nex
 - Duplicate destination filenames are skipped instead of creating `(1)`, `(2)`, ... copies
 - Per-user download and torrent folders
 - Optional per-user aria2 options
-- Optional per-user yt-dlp options
+- Optional per-user yt-dlp options with a graphical configuration assistant
+- Optional torrent search providers: The Pirate Bay, BitSearch, Internet Archive and Academic Torrents
 - Administrator-controlled binary paths and aria2 RPC settings
 - Support for administrator-managed wrapper scripts, including VPN/network-namespace wrappers
 - Existing NCDownloader user/app settings are imported lazily when MediaFetch first reads them
@@ -31,6 +32,7 @@ Current App Store compatibility:
 - aria2
 - yt-dlp
 - ffmpeg for media conversion, extraction and post-processing
+- PHP XMLReader for optional Academic Torrents catalog search
 
 > Nextcloud 35 itself requires PHP 8.3 or newer. MediaFetch keeps PHP 8.2 support for installations running supported older Nextcloud releases.
 
@@ -157,6 +159,14 @@ docker exec -u www-data nextcloud-aio-nextcloud ffmpeg -version
 
 If the binary is visible as root but not executable as `www-data`, MediaFetch will not be able to use it.
 
+## Releases
+
+On a version bump to `appinfo/info.xml` merged into `master`, GitHub Actions tests and builds MediaFetch, then creates a GitHub release tagged `v<version>` with a compiled tarball and SHA-256 checksum. The version in `package.json` must match the Nextcloud app version.
+
+**The GitHub tarball is not a signed Nextcloud App Store update.** Publishing to the App Store requires packaging and signing with the app developer certificate, followed by an App Store submission.
+
+The release notes for version 2.0.0 are in `docs/releases/2.0.0.md`.
+
 ## Configuration
 
 MediaFetch exposes administrator settings and personal settings.
@@ -176,6 +186,55 @@ An empty section is valid and means that MediaFetch uses its normal/default aria
 These settings are **optional** as well.
 
 An empty section is valid. Users only need to add entries when they intentionally want to override supported yt-dlp options.
+
+A graphical assistant offers common video/audio format choices, MP3 conversion, available metadata and thumbnail embedding, subtitles, playlists, speed limits and filename templates. The original advanced options editor is now tucked into an expandable section on the personal settings page, and options already represented by the graphical assistant are not duplicated there. Saving advanced-only parameters preserves the graphical settings. The graphical assistant saves the same personal configuration as the advanced editor; it is not a separate downloader, and these are not per-job profiles.
+
+The settings page uses responsive fields on mobile devices. The main download form now offers per-download presets instead of an extension override; choose **My personal settings** to use your saved configuration without changing it.
+
+### Per-download presets
+
+The yt-dlp download form now uses a **Download preset** dropdown instead of the old format override. It offers:
+
+- **My personal settings** (unchanged yt-dlp options from the personal settings page)
+- **YouTube video / video playlist**, up to 1080p, merging into MP4 when possible
+- **Music track**, **music album**, **music playlist**, with MP3 conversion, embedded metadata/thumbnail, and musician/playlist-index-aware filenames where information is available
+
+For music downloads, **Filename template (`output`)** and **Artist and title parsing rule (`parse-metadata`)** are separate settings. A typical `parse-metadata` rule is `%(title)s:(?P<artist>.+?) - (?P<title>.+)`; a filename template such as `%(artist)s - %(title)s.%(ext)s` belongs only in `output`. MediaFetch now validates this basic `FROM:TO` distinction and reports an actionable error for previously saved malformed values.
+
+On iOS Safari the URL field uses at least 16px text to prevent auto-zoom when it receives focus.
+
+Selecting a preset does **not** write to the user's personal yt-dlp settings; the server accepts only bundled preset identifiers, and the preset is retained for re-download. Video/audio metadata quality depends on the source.
+
+The main form places the target-folder picker below the URL, followed by the optional yt-dlp preset selector and the **Start download** button at the bottom.
+
+### BitTorrent seeding preference
+
+In Personal Settings → BitTorrent seeding, users can select **Stop seeding after the download completes**. For newly created aria2 tasks, this adds the per-download RPC option `seed-time=0`. This option stops post-download seeding; **it does not prevent uploading pieces while a torrent is downloading**. Existing tasks are not changed. When unchecked, the previous aria2 options remain in force.
+
+The two options generated from legacy `ncd_seed_time` / `ncd_seed_ratio` settings now use their valid aria2 names (`seed-time` / `seed-ratio`), only when configured.
+
+Empty arguments that require a value (such as `convert-thumbnails`) are now ignored rather than consuming the next command-line option. Actual no-value flags (such as `embed-metadata`) and `audio-quality=0` are kept as intended. Automated coverage is in `tests/yt-dlp-presets.php`.
+
+### Torrent search providers
+
+The existing search dropdown lists the bundled providers, including The Pirate Bay and BitSearch, alongside **Internet Archive** and **Academic Torrents**. This changes only search discovery; MediaFetch does not enforce a content policy or filter torrent results based on the user's country.
+
+- Internet Archive uses its official Advanced Search API, limited to items with an Archive BitTorrent derivative.
+- Academic Torrents uses its officially published `database.xml` feed, cached in Nextcloud's app data for 24 hours to avoid scraping and repeat downloads. The XMLReader PHP extension is required. If the provider is unavailable, other search sources are unaffected.
+- Provider availability, search results, torrent health, and content rights are not guaranteed. Search results are third-party data. BitTorrent can upload pieces while downloading; users must determine whether their use complies with applicable laws and licenses.
+
+## Languages
+
+MediaFetch 2.0 uses the Nextcloud account language in its navigation, download/search controls, administrator settings, personal settings and graphical yt-dlp assistant.
+
+- **English** is the source language and fallback.
+- **Deutsch** is provided through `l10n/de.json` and `l10n/de.js`.
+
+There is no separate app-level language switch. The language is selected in Nextcloud's personal settings. Technical tool and command-line option names (such as `aria2`, `yt-dlp` or `--embed-metadata`) are intentionally not translated.
+
+Verify the catalogs and interpolation placeholders using `node tests/l10n.cjs`.
+
+The `tests/index-template.php` regression test checks that provider names containing spaces, quotation marks and HTML-special characters remain valid JSON in Nextcloud's data attributes; this prevents the empty main-page failure caused by the new torrent search providers. Nextcloud's own localization tooling may regenerate `l10n/*.js` from the JSON catalogs during installation and updates.
 
 ## aria2 RPC
 

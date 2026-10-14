@@ -1,5 +1,5 @@
 <template>
-  <div :class="container" :path="path" :id="container">
+  <div class="mediafetch-setting-row" :class="container" :path="path" :id="container">
     <label :for="id">{{ label }}</label>
     <input
       type="text"
@@ -14,7 +14,7 @@
     <input
       v-if="useBtn"
       type="button"
-      value="save"
+      :value="tr('Save')"
       :data-rel="container"
       @click.prevent="saveHandler"
     />
@@ -43,6 +43,7 @@ export default {
     };
   },
   methods: {
+    tr(message) { return helper.t(message); },
     saveHandler(e) {
       if (e.type == "change" && this.useBtn) {
         return;
@@ -64,7 +65,7 @@ export default {
             helper.error(resp.error);
             return;
           }
-          helper.info(resp.message);
+          helper.info(helper.t(resp.message));
         })
         .send();
     },

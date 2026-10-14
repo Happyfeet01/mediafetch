@@ -6,6 +6,7 @@ require __DIR__ . "/../../vendor/autoload.php";
 
 use OCP\AppFramework\QueryException;
 use OCP\IServerContainer;
+use OCA\NCDownloader\Tools\Helper;
 use Symfony\Component\HttpClient\Exception\ClientException;
 
 class siteSearch
@@ -36,10 +37,14 @@ class siteSearch
 
     public function setSite($site)
     {
-        if (strpos($site, '\\') !== false) {
-            $this->site = $site;
-        } else {
-            $this->site = __NAMESPACE__ . '\Sites\\' . $site;
+        // Accept only bundled search engines. Never resolve a class name
+        // supplied directly by a user's HTTP request.
+        foreach (Helper::getSearchSites() as $provider) {
+            if ($provider['name'] === $site) {
+                $this->site = $provider['class'];
+                return;
+            }
         }
+        $this->site = $this->defaultSite;
     }
 }

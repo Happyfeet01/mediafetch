@@ -2,6 +2,8 @@
 
 namespace OCA\NCDownloader\Controller;
 
+use OCA\NCDownloader\Ytdl\MetadataRules;
+
 use OCA\NCDownloader\Db\Settings;
 use OCA\NCDownloader\Tools\Helper;
 use OCP\AppFramework\Controller;
@@ -17,6 +19,7 @@ class SettingsController extends Controller
         'ncd_seed_ratio',
         'ncd_seed_time_unit',
         'ncd_seed_time',
+        'ncd_stop_seeding',
         'ncd_download_proxy',
         'ncd_hide_errors',
     ];
@@ -178,6 +181,13 @@ class SettingsController extends Controller
         $params = $this->request->getParams();
         $allowed = array_flip(Settings::safeYtdlOptions());
         $data = array_intersect_key($params, $allowed);
+
+        if (isset($data['parse-metadata']) && !MetadataRules::validParseMetadata($data['parse-metadata'])) {
+            return new JSONResponse([
+                'error' => MetadataRules::message(),
+                'status' => false,
+            ]);
+        }
 
         if (isset($data['output'])) {
             $output = (string) $data['output'];

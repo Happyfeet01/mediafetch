@@ -43,7 +43,7 @@ const buttonHandler = (event, type) => {
             return;
         }
         if (data.hasOwnProperty('result')) {
-            helper.message("Success " + data['result']);
+            helper.message(helper.t('Success: {result}').replace('{result}', data['result']));
         }
         if (data.hasOwnProperty('message')) {
             helper.message(data.message);

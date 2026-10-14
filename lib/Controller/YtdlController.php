@@ -4,9 +4,12 @@ namespace OCA\NCDownloader\Controller;
 
 use OCA\NCDownloader\Aria2\Aria2;
 use OCA\NCDownloader\Db\Helper as DbHelper;
+use OCA\NCDownloader\Db\Settings;
 use OCA\NCDownloader\Files\MediaImporter;
 use OCA\NCDownloader\Tools\Helper;
 use OCA\NCDownloader\Ytdl\Ytdl;
+use OCA\NCDownloader\Ytdl\DownloadPresets;
+use OCA\NCDownloader\Ytdl\MetadataRules;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IL10N;
@@ -17,7 +20,7 @@ use Psr\Log\LoggerInterface;
 class YtdlController extends Controller
 {
     private $l10n;
-    private $audio_extensions = array("mp3", "m4a", "vorbis");
+    private $audio_extensions = array("mp3", "m4a", "vorbis", "opus", "flac", "best");
     private $video_extensions = array("mp4", "webm", "mkv");
     private $uid;
     private $downloadDir;
@@ -128,19 +131,51 @@ class YtdlController extends Controller
     public function Download(?string $url = null, ?string $extension = null)
     {
         $url = $url ?? $this->request->getParam('url') ?? $this->request->getParam('text-input-value');
-        $extension = $extension ?? $this->request->getParam('extension') ?? "mp4";
-        $extension = trim((string) $extension) ?: "mp4";
+        $preset = (string) ($this->request->getParam('preset') ?? DownloadPresets::PERSONAL);
+        if (!DownloadPresets::isValid($preset)) {
+            return new JSONResponse(['error' => 'Unknown download preset.'], 400);
+        }
         if (!$url || !is_string($url)) {
-            return new JSONResponse(['error' => "no url value is received!"]);
+            return new JSONResponse(['error' => 'no url value is received!'], 400);
         }
 
         $url = trim($url);
+
+        // Old saved settings may predate save-time validation. Catch malformed
+        // --parse-metadata before spawning yt-dlp so users get actionable
+        // feedback instead of a long raw command-line usage error.
+        $savedMetadataRule = (new Settings($this->uid))->getYtdl()['parse-metadata'] ?? null;
+        if ($savedMetadataRule !== null && !MetadataRules::validParseMetadata($savedMetadataRule)) {
+            // The existing download UI shows JSON errors from successful HTTP responses.
+            return new JSONResponse(['error' => MetadataRules::message()]);
+        }
+
         $yt = $this->ytdl;
-        if (in_array($extension, $this->audio_extensions, true)) {
-            $yt->audioOnly = true;
-            $yt->audioFormat = $extension;
+
+        if ($preset !== DownloadPresets::PERSONAL) {
+            $yt->applyDownloadPreset($preset);
         } else {
-            $yt->videoFormat = $extension;
+            // Keep previously saved yt-dlp settings as the default.
+            // Extension remains supported for legacy API callers only.
+            $extension = trim((string) ($extension ?? $this->request->getParam('extension') ?? ''));
+            if ($extension === '') {
+                // The visible "My personal settings" preset must really honor
+                // the configured yt-dlp output rather than force MP4 recoding.
+                $personalOptions = (new Settings($this->uid))->getYtdl();
+                if (array_key_exists('extract-audio', $personalOptions)) {
+                    $yt->audioOnly = true;
+                    $preferredAudio = (string) ($personalOptions['audio-format'] ?? 'best');
+                    $yt->audioFormat = in_array($preferredAudio, $this->audio_extensions, true)
+                        ? $preferredAudio : 'best';
+                }
+            } elseif (in_array($extension, $this->audio_extensions, true)) {
+                $yt->audioOnly = true;
+                $yt->audioFormat = $extension;
+            } elseif (in_array($extension, $this->video_extensions, true)) {
+                $yt->videoFormat = $extension;
+            } else {
+                return new JSONResponse(['error' => 'Unknown download format.'], 400);
+            }
         }
 
         if (!$yt->isInstalled()) {
@@ -334,11 +369,16 @@ class YtdlController extends Controller
             return new JSONResponse(['error' => "no link"]);
         }
 
-        if (isset($data['ext'])) {
+        // Re-download with the same preset rather than silently reverting to
+        // the user's current personal defaults.
+        $preset = (string) ($data['preset'] ?? DownloadPresets::PERSONAL);
+        if (DownloadPresets::isValid($preset) && $preset !== DownloadPresets::PERSONAL) {
+            $this->ytdl->applyDownloadPreset($preset);
+        } elseif (isset($data['ext'])) {
             if (in_array($data['ext'], $this->audio_extensions, true)) {
                 $this->ytdl->audioOnly = true;
                 $this->ytdl->audioFormat = $data['ext'];
-            } else {
+            } elseif (in_array($data['ext'], $this->video_extensions, true)) {
                 $this->ytdl->audioOnly = false;
                 $this->ytdl->videoFormat = $data['ext'];
             }

@@ -1,3 +1,5 @@
+import { translate as t } from '@nextcloud/l10n'
+
 type dataItems = {
     name: string;
     value: any;
@@ -41,7 +43,7 @@ class settingsForm {
         }
         div.appendChild(this._createInput(items));
         items.id = valueId
-        items.placeholder = 'Leave empty if no value needed'
+        items.placeholder = t('mediafetch', 'Leave empty if no value needed')
         div.appendChild(this._createInput(items));
         div.appendChild(this._createCancelBtn());
         return div;
@@ -68,7 +70,7 @@ class settingsForm {
     _createSaveBtn(id: string): HTMLElement {
         let button = document.createElement("input");
         button.setAttribute('type', 'button');
-        button.setAttribute('value', 'save');
+        button.setAttribute('value', t('mediafetch', 'Save'));
         button.setAttribute("data-rel", id + "-container");
         return button;
     }

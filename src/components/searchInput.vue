@@ -27,7 +27,7 @@ import { translate as t } from "@nextcloud/l10n";
 export default {
   data() {
     return {
-      placeholder: t("ncdownloader", "Enter keyword to search"),
+      placeholder: t("mediafetch", "Enter keyword to search"),
       selected: "TPB",
     };
   },
@@ -36,6 +36,7 @@ export default {
     actionButton,
   },
   methods: {
+    t,
     search(event, btnVm) {
       this.$emit("search", event, btnVm);
     },
@@ -49,7 +50,7 @@ export default {
   },
   name: "searchInput",
   props: {
-    selectOptions: Object,
+    selectOptions: Array,
   },
 };
 </script>

@@ -13,6 +13,46 @@ class Ytdl
     public $dbDlPath = null;
     private $format = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
     private $options = [];
+    private array $personalSettings = [];
+    private string $downloadPreset = DownloadPresets::PERSONAL;
+
+    // Only these yt-dlp options are switches without a following argument.
+    // A missing value on a value-taking option must not swallow the next
+    // switch (e.g. --convert-thumbnails --parse-metadata).
+    private const VALUELESS_OPTIONS = [
+        'ignore-errors', 'no-abort-on-error', 'abort-on-error',
+        'flat-playlist', 'no-flat-playlist', 'live-from-start', 'no-live-from-start',
+        'no-colors', 'force-ipv4', 'force-ipv6', 'no-match-filter',
+        'no-playlist', 'yes-playlist', 'break-on-existing', 'break-on-reject',
+        'break-per-input', 'no-break-per-input', 'skip-unavailable-fragments',
+        'abort-on-unavailable-fragment', 'keep-fragments', 'no-keep-fragments',
+        'resize-buffer', 'no-resize-buffer', 'playlist-reverse',
+        'no-playlist-reverse', 'playlist-random', 'restrict-filenames',
+        'no-restrict-filenames', 'windows-filenames', 'no-windows-filenames',
+        'no-overwrites', 'force-overwrites', 'no-force-overwrites',
+        'continue', 'no-continue', 'part', 'no-part', 'mtime', 'no-mtime',
+        'write-description', 'no-write-description', 'write-info-json',
+        'no-write-info-json', 'write-playlist-metafiles', 'no-write-playlist-metafiles',
+        'clean-info-json', 'no-clean-info-json', 'write-comments',
+        'no-write-comments', 'write-thumbnail', 'no-write-thumbnail',
+        'write-all-thumbnails', 'list-thumbnails', 'no-simulate',
+        'skip-download', 'dump-json', 'dump-single-json', 'newline',
+        'no-progress', 'progress', 'verbose', 'format-sort-force',
+        'no-format-sort-force', 'video-multistreams', 'no-video-multistreams',
+        'audio-multistreams', 'no-audio-multistreams', 'prefer-free-formats',
+        'no-prefer-free-formats', 'check-formats', 'check-all-formats',
+        'no-check-formats', 'list-formats', 'write-subs', 'no-write-subs',
+        'write-auto-subs', 'no-write-auto-subs', 'list-subs',
+        'extract-audio', 'keep-video', 'no-keep-video',
+        'post-overwrites', 'no-post-overwrites', 'embed-subs', 'no-embed-subs',
+        'embed-thumbnail', 'no-embed-thumbnail', 'embed-metadata',
+        'no-embed-metadata', 'embed-chapters', 'no-embed-chapters',
+        'embed-info-json', 'no-embed-info-json', 'split-chapters',
+        'no-split-chapters', 'force-keyframes-at-cuts',
+        'no-force-keyframes-at-cuts', 'no-sponsorblock', 'allow-dynamic-mpd',
+        'ignore-dynamic-mpd', 'hls-split-discontinuity',
+        'no-hls-split-discontinuity',
+    ];
     private $downloadDir;
     private $timeout = 60 * 60 * 10;
     private $outTpl = "%(title).32s.%(ext)s";
@@ -43,28 +83,59 @@ class Ytdl
             chmod($this->bin, 0744);
         }
         $this->setDownloadDir($downloadDir);
-        if (!empty($settings)) {
-            foreach ($settings as $key => $value) {
-                if (empty($value)) {
-                    $this->addOption($key, true);
-                } else {
-                    $this->setOption($key, $value, true);
-                }
-            }
-        }
+        $this->personalSettings = is_array($settings) ? $settings : [];
+        $this->configureDownloadOptions($this->personalSettings);
         if (empty($lang = getenv('LANG')) || strpos(strtolower($lang), 'c.utf-8') === false) {
             $lang = 'C.UTF-8';
         }
         $this->setEnv('LANG', $lang);
-        $this->addOption("--no-mtime");
-        $this->addOption('--ignore-errors');
+    }
 
-        if (($index = $this->hasOption('--output')) !== false) {
-            $this->outTpl = $this->options[$index + 1];
-            unset($this->options[$index]);
-            unset($this->options[$index + 1]);
-            $this->options = array_values($this->options);
+    /**
+     * Change only this download's settings. The persisted Nextcloud personal
+     * options remain untouched.
+     */
+    public function applyDownloadPreset(string $preset): void
+    {
+        if (!DownloadPresets::isValid($preset)) {
+            throw new \InvalidArgumentException('Unknown MediaFetch download preset.');
         }
+        if ($preset === DownloadPresets::PERSONAL) {
+            return;
+        }
+
+        $this->configureDownloadOptions(DownloadPresets::apply($this->personalSettings, $preset));
+        $this->downloadPreset = $preset;
+        $this->videoFormat = null; // Presets select/merge rather than re-encode videos.
+        $this->audioOnly = DownloadPresets::isMusic($preset);
+        if ($this->audioOnly) {
+            $this->audioFormat = 'mp3';
+        }
+    }
+
+    private function configureDownloadOptions(array $settings): void
+    {
+        $this->options = [];
+        $this->outTpl = '%(title).32s.%(ext)s';
+
+        foreach ($settings as $key => $value) {
+            $key = ltrim((string) $key, '-');
+            if ($key === 'output' && is_scalar($value) && (string) $value !== '') {
+                $this->outTpl = (string) $value;
+                continue;
+            }
+            if (in_array($key, self::VALUELESS_OPTIONS, true)) {
+                // Switches use no argument regardless of a legacy empty value.
+                $this->addOption($key, true);
+            } elseif (is_scalar($value) && (string) $value !== '') {
+                $this->setOption($key, (string) $value, true);
+            }
+            // Ignore an empty value-taking option rather than accidentally
+            // passing the next yt-dlp switch as its parameter.
+        }
+
+        $this->addOption('--no-mtime');
+        $this->addOption('--ignore-errors');
     }
 
     public function setEnv($key, $val)
@@ -75,7 +146,9 @@ class Ytdl
     public function audioMode()
     {
         if (Helper::ffmpegInstalled()) {
-            $this->addOption('--extract-audio');
+            if ($this->hasOption('--extract-audio') === false) {
+                $this->addOption('--extract-audio');
+            }
         } else {
             $this->audioFormat = "m4a";
         }
@@ -137,11 +210,18 @@ class Ytdl
         if ($this->audioOnly) {
             $this->audioMode();
         } else {
+            // A personal --format selector (for example the GUI quality limit)
+            // must not be overwritten by MediaFetch's default format selector.
+            if ($this->hasOption('--format') === false) {
+                $this->setOption(
+                    '--format',
+                    Helper::ffmpegInstalled() && $this->videoFormat
+                        ? 'bestvideo+bestaudio/best'
+                        : $this->format
+                );
+            }
             if (Helper::ffmpegInstalled() && $this->videoFormat) {
-                $this->setOption('--format', 'bestvideo+bestaudio/best');
                 $this->setVideoFormat($this->videoFormat);
-            } else {
-                $this->setOption('--format', $this->format);
             }
         }
 
@@ -152,7 +232,7 @@ class Ytdl
         $this->setUrl($url);
         $this->prependOption($this->bin);
 
-        $data = ['link' => $url, 'path' => $this->dbDlPath];
+        $data = ['link' => $url, 'path' => $this->dbDlPath, 'preset' => $this->downloadPreset];
         if ($this->audioOnly) {
             $data['ext'] = $this->audioFormat;
         } else {
