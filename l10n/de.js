@@ -193,5 +193,19 @@ OC.L10N.register("mediafetch", {
   "Edit additional yt-dlp options only when needed. These are the same saved settings as in the graphical assistant.": "Nur bei Bedarf weitere yt-dlp-Optionen bearbeiten. Hier gelten dieselben gespeicherten Einstellungen wie im grafischen Assistenten.",
   "MediaFetch could not load. Please reload the page and check the browser console or Nextcloud logs if this persists.": "MediaFetch konnte nicht geladen werden. Bitte lade die Seite neu. Wenn der Fehler bleibt, prüfe die Browserkonsole oder die Nextcloud-Protokolle.",
   "Could not save settings.": "Einstellungen konnten nicht gespeichert werden.",
-  "Could not load current settings.": "Aktuelle Einstellungen konnten nicht geladen werden."
+  "Could not load current settings.": "Aktuelle Einstellungen konnten nicht geladen werden.",
+  "Download preset": "Download-Vorlage",
+  "My personal settings": "Meine persönlichen Einstellungen",
+  "YouTube video (1080p)": "YouTube-Video (1080p)",
+  "Video playlist (1080p)": "Video-Playlist (1080p)",
+  "Music track (MP3 + tags)": "Musiktitel (MP3 + Tags)",
+  "Music album (MP3 + tags)": "Musikalbum (MP3 + Tags)",
+  "Music playlist (MP3 + tags)": "Musik-Playlist (MP3 + Tags)",
+  "This preset applies only to this download. Personal settings will not be changed.": "Die Vorlage gilt nur für diesen Download. Deine persönlichen Einstellungen bleiben erhalten.",
+  "Start download": "Download starten",
+  "BitTorrent seeding": "BitTorrent-Seeding",
+  "Stop seeding after the download completes": "Seeding nach dem Download stoppen",
+  "When enabled, aria2 stops seeding completed torrents (seed-time=0). Pieces may still be uploaded while downloading. This does not change existing torrents.": "Bei aktivierter Option stoppt aria2 das Seeding nach Downloadabschluss (seed-time=0). Während des Downloads können weiterhin Dateiteile hochgeladen werden. Bereits laufende Torrents bleiben unverändert.",
+  "Torrent seeding preference saved.": "Seeding-Einstellung gespeichert.",
+  "Could not save torrent seeding preference.": "Seeding-Einstellung konnte nicht gespeichert werden."
 }, "nplurals=2; plural=(n != 1);");
