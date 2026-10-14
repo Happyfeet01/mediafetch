@@ -120,6 +120,7 @@ export default {
             });
           }
           helper.info(resp.message);
+          this.$emit('saved');
         })
         .send();
     },
