@@ -61,5 +61,8 @@ jobs:
       - name: Test torrent search actions
         run: node tests/torrent-search-actions.cjs
 
+      - name: Validate language catalogs
+        run: node tests/l10n.cjs
+
       - name: Build frontend
         run: npm run build
