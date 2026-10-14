@@ -12,16 +12,16 @@
       <button
         class="custom-settings-add-btn"
         @click.prevent="newOption($event, name)"
-        data-tippy-content="Add new options"
+        :data-tippy-content="tr('Add new options')"
       >
-        <slot name="add">New Option</slot>
+        <slot name="add">{{ tr('New Option') }}</slot>
       </button>
       <button
         class="custom-settings-save-btn"
         @click.prevent="saveOptions"
         :data-rel="id"
       >
-        <slot name="save">Save</slot>
+        <slot name="save">{{ tr('Save') }}</slot>
       </button>
     </div>
   </div>
@@ -65,6 +65,7 @@ export default {
     },
   },
   methods: {
+    tr(message) { return helper.t(message); },
     newOption(e, baseName) {
       e.stopPropagation();
       let element = e.target;
@@ -96,7 +97,7 @@ export default {
         }
       }
       if (badOptions.length > 0) {
-        helper.error("invalid options: " + badOptions.join(","));
+        helper.error(this.tr('Invalid options: {options}').replace('{options}', badOptions.join(',')));
         return;
       }
       helper
@@ -119,7 +120,7 @@ export default {
               element.remove();
             });
           }
-          helper.info(resp.message);
+          helper.info(helper.t(resp.message));
           this.$emit('saved');
         })
         .send();
