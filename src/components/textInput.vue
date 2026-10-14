@@ -30,7 +30,10 @@ export default {
     margin: 0px;
     background-color: var(--color-main-background, $bg-color);
     color: var(--color-main-text, #181616);
-    font-size: medium;
+    font-size: 16px;
+    line-height: 1.35;
+    box-sizing: border-box;
+    min-height: 48px;
     border-radius: 0em;
     border: 1px solid var(--color-border, #ccc);
     &:focus {
@@ -51,8 +54,9 @@ export default {
 @media only screen and (max-width: 600px) {
   #text-input-link {
     input {
-      font-size: smaller;
-      min-height: 44px;
+      // Safari on iOS auto-zooms focused inputs when font-size < 16px.
+      font-size: 16px;
+      min-height: 48px;
     }
   }
 }
