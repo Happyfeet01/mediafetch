@@ -8,6 +8,7 @@ use OCA\NCDownloader\Db\Settings;
 use OCA\NCDownloader\Files\MediaImporter;
 use OCA\NCDownloader\Tools\Helper;
 use OCA\NCDownloader\Ytdl\Ytdl;
+use OCA\NCDownloader\Ytdl\DownloadPresets;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IL10N;
@@ -129,29 +130,38 @@ class YtdlController extends Controller
     public function Download(?string $url = null, ?string $extension = null)
     {
         $url = $url ?? $this->request->getParam('url') ?? $this->request->getParam('text-input-value');
-        $extension = trim((string) ($extension ?? $this->request->getParam('extension') ?? ''));
-
-        // The "Default" selection in the download form should respect a user's
-        // saved audio-extraction preference. An explicitly chosen extension
-        // always takes precedence over personal settings.
-        if ($extension === '') {
-            $personalOptions = (new Settings($this->uid))->getYtdl();
-            $preferredAudio = (string) ($personalOptions['audio-format'] ?? 'best');
-            $extension = isset($personalOptions['extract-audio'])
-                ? (in_array($preferredAudio, $this->audio_extensions, true) ? $preferredAudio : 'best')
-                : 'mp4';
+        $preset = (string) ($this->request->getParam('preset') ?? DownloadPresets::PERSONAL);
+        if (!DownloadPresets::isValid($preset)) {
+            return new JSONResponse(['error' => 'Unknown download preset.'], 400);
         }
         if (!$url || !is_string($url)) {
-            return new JSONResponse(['error' => "no url value is received!"]);
+            return new JSONResponse(['error' => 'no url value is received!'], 400);
         }
 
         $url = trim($url);
         $yt = $this->ytdl;
-        if (in_array($extension, $this->audio_extensions, true)) {
-            $yt->audioOnly = true;
-            $yt->audioFormat = $extension;
+
+        if ($preset !== DownloadPresets::PERSONAL) {
+            $yt->applyDownloadPreset($preset);
         } else {
-            $yt->videoFormat = $extension;
+            // Keep previously saved yt-dlp settings as the default.
+            // Extension remains supported for legacy API callers only.
+            $extension = trim((string) ($extension ?? $this->request->getParam('extension') ?? ''));
+            if ($extension === '') {
+                $personalOptions = (new Settings($this->uid))->getYtdl();
+                $preferredAudio = (string) ($personalOptions['audio-format'] ?? 'best');
+                $extension = isset($personalOptions['extract-audio'])
+                    ? (in_array($preferredAudio, $this->audio_extensions, true) ? $preferredAudio : 'best')
+                    : 'mp4';
+            }
+            if (in_array($extension, $this->audio_extensions, true)) {
+                $yt->audioOnly = true;
+                $yt->audioFormat = $extension;
+            } elseif (in_array($extension, $this->video_extensions, true)) {
+                $yt->videoFormat = $extension;
+            } else {
+                return new JSONResponse(['error' => 'Unknown download format.'], 400);
+            }
         }
 
         if (!$yt->isInstalled()) {
@@ -345,11 +355,16 @@ class YtdlController extends Controller
             return new JSONResponse(['error' => "no link"]);
         }
 
-        if (isset($data['ext'])) {
+        // Re-download with the same preset rather than silently reverting to
+        // the user's current personal defaults.
+        $preset = (string) ($data['preset'] ?? DownloadPresets::PERSONAL);
+        if (DownloadPresets::isValid($preset) && $preset !== DownloadPresets::PERSONAL) {
+            $this->ytdl->applyDownloadPreset($preset);
+        } elseif (isset($data['ext'])) {
             if (in_array($data['ext'], $this->audio_extensions, true)) {
                 $this->ytdl->audioOnly = true;
                 $this->ytdl->audioFormat = $data['ext'];
-            } else {
+            } elseif (in_array($data['ext'], $this->video_extensions, true)) {
                 $this->ytdl->audioOnly = false;
                 $this->ytdl->videoFormat = $data['ext'];
             }
