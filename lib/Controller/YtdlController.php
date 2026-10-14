@@ -4,6 +4,7 @@ namespace OCA\NCDownloader\Controller;
 
 use OCA\NCDownloader\Aria2\Aria2;
 use OCA\NCDownloader\Db\Helper as DbHelper;
+use OCA\NCDownloader\Db\Settings;
 use OCA\NCDownloader\Files\MediaImporter;
 use OCA\NCDownloader\Tools\Helper;
 use OCA\NCDownloader\Ytdl\Ytdl;
@@ -128,8 +129,18 @@ class YtdlController extends Controller
     public function Download(?string $url = null, ?string $extension = null)
     {
         $url = $url ?? $this->request->getParam('url') ?? $this->request->getParam('text-input-value');
-        $extension = $extension ?? $this->request->getParam('extension') ?? "mp4";
-        $extension = trim((string) $extension) ?: "mp4";
+        $extension = trim((string) ($extension ?? $this->request->getParam('extension') ?? ''));
+
+        // The "Default" selection in the download form should respect a user's
+        // saved audio-extraction preference. An explicitly chosen extension
+        // always takes precedence over personal settings.
+        if ($extension === '') {
+            $personalOptions = (new Settings($this->uid))->getYtdl();
+            $preferredAudio = (string) ($personalOptions['audio-format'] ?? 'm4a');
+            $extension = isset($personalOptions['extract-audio'])
+                ? (in_array($preferredAudio, $this->audio_extensions, true) ? $preferredAudio : 'm4a')
+                : 'mp4';
+        }
         if (!$url || !is_string($url)) {
             return new JSONResponse(['error' => "no url value is received!"]);
         }
