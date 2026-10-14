@@ -17,7 +17,8 @@ It continues the NCDownloader / Net loader codebase with support for current Nex
 - Duplicate destination filenames are skipped instead of creating `(1)`, `(2)`, ... copies
 - Per-user download and torrent folders
 - Optional per-user aria2 options
-- Optional per-user yt-dlp options
+- Optional per-user yt-dlp options with a graphical configuration assistant
+- Optional torrent search providers: The Pirate Bay, BitSearch, Internet Archive and Academic Torrents
 - Administrator-controlled binary paths and aria2 RPC settings
 - Support for administrator-managed wrapper scripts, including VPN/network-namespace wrappers
 - Existing NCDownloader user/app settings are imported lazily when MediaFetch first reads them
@@ -31,6 +32,7 @@ Current App Store compatibility:
 - aria2
 - yt-dlp
 - ffmpeg for media conversion, extraction and post-processing
+- PHP XMLReader for optional Academic Torrents catalog search
 
 > Nextcloud 35 itself requires PHP 8.3 or newer. MediaFetch keeps PHP 8.2 support for installations running supported older Nextcloud releases.
 
@@ -176,6 +178,18 @@ An empty section is valid and means that MediaFetch uses its normal/default aria
 These settings are **optional** as well.
 
 An empty section is valid. Users only need to add entries when they intentionally want to override supported yt-dlp options.
+
+A graphical assistant offers common video/audio format choices, MP3 conversion, available metadata and thumbnail embedding, subtitles, playlists, speed limits and filename templates. The original advanced options editor remains available. The graphical assistant saves the same personal configuration as the advanced editor; it is not a separate downloader, and these are not per-job profiles.
+
+The download form's explicit audio/video extension takes priority over personal defaults. With the default extension selected, saved audio extraction settings are respected.
+
+### Torrent search providers
+
+The existing search dropdown lists the bundled providers, including The Pirate Bay and BitSearch, alongside **Internet Archive** and **Academic Torrents**. This changes only search discovery; MediaFetch does not enforce a content policy or filter torrent results based on the user's country.
+
+- Internet Archive uses its official Advanced Search API, limited to items with an Archive BitTorrent derivative.
+- Academic Torrents uses its officially published `database.xml` feed, cached in Nextcloud's app data for 24 hours to avoid scraping and repeat downloads. The XMLReader PHP extension is required. If the provider is unavailable, other search sources are unaffected.
+- Provider availability, search results, torrent health, and content rights are not guaranteed. Search results are third-party data. BitTorrent can upload pieces while downloading; users must determine whether their use complies with applicable laws and licenses.
 
 ## aria2 RPC
 
