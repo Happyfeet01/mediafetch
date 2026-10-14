@@ -13,6 +13,9 @@ namespace OCP {
 }
 
 namespace {
+    // Nextcloud registers this template helper at runtime.
+    function print_unescaped(string $value): void { echo $value; }
+
     final class MediaFetchTemplateHarness
     {
         public function inc(string $template): string
