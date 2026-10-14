@@ -110,10 +110,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          NOTES_FILE="docs/releases/${version}.md"
+          test -s "$NOTES_FILE"
           gh release create "v${version}" \
             "mediafetch-${version}.tar.gz" \
             "mediafetch-${version}.tar.gz.sha256" \
             --target "$GITHUB_SHA" \
             --title "MediaFetch ${version}" \
-            --notes-file "docs/releases/2.0.0.md" \
+            --notes-file "$NOTES_FILE" \
             --latest
