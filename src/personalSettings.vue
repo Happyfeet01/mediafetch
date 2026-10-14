@@ -14,7 +14,8 @@
     <p class="mediafetch-advanced-note">{{ tr('Edit additional yt-dlp options only when needed. These are the same saved settings as in the graphical assistant.') }}</p>
     <customOptions name="custom-ytdl-settings" :title="tr('Additional yt-dlp parameters')" @mounted="renderYtdl"
       @saved="refreshYtdlWizard"
-      path="/apps/mediafetch/personal/ytdl/save" :validOptions="ytdlOptions">
+      path="/apps/mediafetch/personal/ytdl/save" :validOptions="ytdlOptions"
+      :hiddenOptions="managedYtdlOptions" mergeReadPath="/apps/mediafetch/personal/ytdl/get">
       <template #save>{{ tr('Save yt-dlp Settings') }}</template>
     </customOptions>
   </details>
@@ -24,6 +25,7 @@ import customOptions from "./components/customOptions";
 import helper from "./utils/helper";
 import safeAria2Options from "./utils/safeAria2Options";
 import safeYtdlOptions from "./utils/safeYtdlOptions";
+import managedYtdlOptions from "./utils/managedYtdlOptions";
 import settingsRow from "./components/settingsRow";
 import ytdlOptionsWizard from "./components/ytdlOptionsWizard";
 
@@ -34,6 +36,7 @@ export default {
       options: [],
       aria2Options: safeAria2Options,
       ytdlOptions: safeYtdlOptions,
+      managedYtdlOptions,
       disallowAria2Settings: false,
       isAdmin: false,
     };
