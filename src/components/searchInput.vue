@@ -50,7 +50,7 @@ export default {
   },
   name: "searchInput",
   props: {
-    selectOptions: Object,
+    selectOptions: Array,
   },
 };
 </script>
