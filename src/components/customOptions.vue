@@ -46,6 +46,14 @@ export default {
     classes: String,
     validOptions: Array,
     options: Array,
+    hiddenOptions: {
+      type: Array,
+      default: () => [],
+    },
+    mergeReadPath: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return {
@@ -61,7 +69,10 @@ export default {
   },
   computed: {
     rows() {
-      return this.options;
+      return this.options.filter((option) => !this.hiddenOptions.includes(option.name));
+    },
+    allowedOptions() {
+      return this.validOptions.filter((option) => !this.hiddenOptions.includes(option));
     },
   },
   methods: {
@@ -82,7 +93,7 @@ export default {
       }
       let form = settingsForm.getInstance();
       element.before(form.createInputGroup(key, value));
-      helper.autoComplete(`[id^='${baseName}-key']`, this.validOptions);
+      helper.autoComplete(`[id^='${baseName}-key']`, this.allowedOptions);
     },
     saveOptions(e) {
       let element = e.target;
@@ -92,7 +103,7 @@ export default {
       data = helper.transformParams(data, this.name);
       let badOptions = [];
       for (let name in data) {
-        if (!this.validOptions.includes(name)) {
+        if (!this.allowedOptions.includes(name)) {
           badOptions.push(name);
         }
       }
@@ -100,29 +111,51 @@ export default {
         helper.error(this.tr('Invalid options: {options}').replace('{options}', badOptions.join(',')));
         return;
       }
+      const submit = (payload) => {
+        helper
+          .httpClient(url)
+          .setData(payload)
+          .setHandler((resp) => {
+            if (!resp || resp.error) {
+              helper.error(resp?.error || this.tr('Could not save settings.'));
+              return;
+            }
+            this.options = Object.keys(payload).map((key) => ({ name: key, value: payload[key] }));
+            const inputDiv = element.parentElement.querySelectorAll(
+              `div[id^='${this.name}-key']`
+            );
+            inputDiv.forEach((input) => input.remove());
+            helper.info(helper.t(resp.message));
+            this.$emit('saved');
+          })
+          .setErrorHandler(() => helper.error(this.tr('Could not save settings.')))
+          .send();
+      };
+
+      if (!this.mergeReadPath) {
+        submit(data);
+        return;
+      }
+
+      // Advanced yt-dlp settings only show options absent from the graphical
+      // editor. Read the latest stored values to preserve hidden GUI options
+      // while allowing users to remove old advanced-only options.
       helper
-        .httpClient(url)
-        .setData(data)
-        .setHandler((resp) => {
-          if (resp.error) {
-            helper.error(resp.error);
+        .httpClient(helper.generateUrl(this.mergeReadPath))
+        .setHandler((stored) => {
+          if (!stored || typeof stored !== 'object' || Array.isArray(stored)) {
+            helper.error(this.tr('Could not load current settings.'));
             return;
           }
-          this.options = [];
-          for (let key in data) {
-            this.options.push({ name: key, value: data[key] });
+          const preserved = {};
+          for (const key in stored) {
+            if (this.hiddenOptions.includes(key)) {
+              preserved[key] = stored[key];
+            }
           }
-          let inputDiv = element.parentElement.querySelectorAll(
-            `div[id^='${this.name}-key']`
-          );
-          if (inputDiv && inputDiv.length > 0) {
-            inputDiv.forEach((element) => {
-              element.remove();
-            });
-          }
-          helper.info(helper.t(resp.message));
-          this.$emit('saved');
+          submit({ ...preserved, ...data });
         })
+        .setErrorHandler(() => helper.error(this.tr('Could not load current settings.')))
         .send();
     },
   },
