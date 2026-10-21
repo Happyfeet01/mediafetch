@@ -232,7 +232,30 @@
     width: 160px;
 }
 
-@media only screen and (min-width: 800px) {}
+@media only screen and (min-width: 1025px) {
+    #app-ncdownloader-wrapper {
+        // The mobile drawer button would otherwise stretch to the full
+        // height of this flex container, appearing like a left scrollbar.
+        > #app-navigation-toggle {
+            display: none;
+        }
+
+        #app-content {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        #app-content-wrapper {
+            box-sizing: border-box;
+            padding: 24px;
+        }
+
+        #ncdownloader-form-wrapper {
+            max-width: 960px;
+            margin-inline: auto;
+        }
+    }
+}
 
 @media only screen and (max-width: 1024px) {
     #ncdownloader-body-wrapper {
