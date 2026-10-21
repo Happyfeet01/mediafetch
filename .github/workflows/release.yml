@@ -1,10 +1,13 @@
 name: Publish MediaFetch GitHub release
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:
       - 'appinfo/info.xml'
+      - 'package.json'
+      - 'docs/releases/**'
 
 permissions:
   contents: write
