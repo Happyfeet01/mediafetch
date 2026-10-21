@@ -333,6 +333,28 @@ export default {
     white-space: nowrap;
   }
 }
+@media only screen and (min-width: 1025px) {
+  #nc-vue-unified-form {
+    flex-direction: column;
+    gap: 12px;
+
+    .downloader-ip {
+      flex-basis: auto;
+      margin-bottom: 0;
+      justify-content: center;
+    }
+
+    .options-group {
+      height: auto;
+      justify-content: center;
+    }
+
+    .action-group {
+      flex: 0 0 auto;
+      min-width: 0;
+    }
+  }
+}
 @media only screen and (max-width: 1024px) {
   #nc-vue-unified-form {
     display: flex;
