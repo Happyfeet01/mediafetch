@@ -352,3 +352,13 @@ It is based on the original NCDownloader / Net loader project by Jiaxin Huang an
 - Nextcloud App Store: https://apps.nextcloud.com/apps/mediafetch
 - GitHub repository: https://github.com/Happyfeet01/mediafetch
 - Issue tracker: https://github.com/Happyfeet01/mediafetch/issues
+
+
+## Support my open-source work
+
+I maintain this project and other open-source tools in my spare time. If my work is useful to you, you can support further development voluntarily:
+
+- [Buy Me a Coffee](https://buymeacoffee.com/sly5ir9ov)
+- [PayPal](https://paypal.me/LarsM1980)
+
+Bug reports, documentation improvements and contributions are just as welcome. Support is entirely optional.
