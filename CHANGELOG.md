@@ -4,6 +4,12 @@ All notable changes to MediaFetch will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-11-15
+
+### Fixed
+
+- CI pipeline pinned to ubuntu-24.04 and Node 22 after the GitHub-hosted Ubuntu 26 image broke npm installs.
+
 ## [2.0.0] - 2026-10-14
 
 ### Added
