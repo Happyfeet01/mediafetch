@@ -4,6 +4,10 @@ All notable changes to MediaFetch will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.3]
+
+- Add optional developer support links in the app and its store listing.
+
 ## [2.0.2] - 2026-11-15
 
 ### Fixed
