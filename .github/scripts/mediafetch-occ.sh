@@ -8,7 +8,7 @@ if [[ "$mode" == sign ]]; then
   mounts+=(--volume "${3:?missing signing directory}:/keys:ro")
 fi
 
-docker run --rm --network none --user "$(id -u):$(id -g)" "${mounts[@]}" \\
+docker run --rm --network none --user "$(id -u):$(id -g)" "${mounts[@]}" \
   --entrypoint bash nextcloud:32-apache -euc '
     work=$(mktemp -d)
     cp -R /usr/src/nextcloud/. "$work/"
