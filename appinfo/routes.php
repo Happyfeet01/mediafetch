@@ -2,6 +2,8 @@
 
 return [
     'routes' => [
+    ['name' => 'supportNotice#status', 'url' => '/support-notice', 'verb' => 'GET'],
+    ['name' => 'supportNotice#dismiss', 'url' => '/support-notice', 'verb' => 'POST'],
         ['name' => 'Main#Index', 'url' => '/', 'verb' => 'GET'],
         ['name' => 'Main#Upload', 'url' => '/upload', 'verb' => 'POST'],
         ['name' => 'Main#getCounters', 'url' => '/counters', 'verb' => 'GET'],

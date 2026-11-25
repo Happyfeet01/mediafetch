@@ -8,12 +8,15 @@ declare(strict_types=1);
 
 namespace OCP {
     class Util {
+        public static function addScript(string $app, string $script): void {}
+        public static function addStyle(string $app, string $style): void {}
         public static function addHeader(string $type, array $attributes): void {}
     }
 }
 
 namespace {
     // Nextcloud registers this template helper at runtime.
+    function p(string $value): void { echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
     function print_unescaped(string $value): void { echo $value; }
 
     final class MediaFetchTemplateHarness
@@ -27,6 +30,9 @@ namespace {
         public function render(string $searchSites, string $settings): string
         {
             $_ = ['search_sites' => $searchSites, 'settings' => $settings];
+            $l = new class {
+                public function getLanguageCode(): string { return 'de'; }
+            };
             ob_start();
             include __DIR__ . '/../templates/Index.php';
             return (string) ob_get_clean();

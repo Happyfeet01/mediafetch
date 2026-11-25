@@ -20,10 +20,23 @@ MediaFetch is based on the original NCDownloader / Net loader project and contin
     <website>https://github.com/Happyfeet01/mediafetch</website>
     <bugs>https://github.com/Happyfeet01/mediafetch/issues</bugs>
     <repository>https://github.com/Happyfeet01/mediafetch</repository>
+    <screenshot>https://raw.githubusercontent.com/Happyfeet01/mediafetch/ca2dace74f6b5ddfd5b6e2f95296a1a14b46b385/docs/screenshots/download-form.png</screenshot>
+    <donation type="other" title="Buy Me a Coffee">https://buymeacoffee.com/sly5ir9ov</donation>
+    <donation type="other" title="Unterstützung des Entwicklers über Ko-fi">https://ko-fi.com/dermueller</donation>
+    <donation type="paypal" title="Unterstützung des Entwicklers über PayPal">https://paypal.me/LarsM1980</donation>
     <dependencies>
         <php min-version="8.2" max-version="8.5" />
         <nextcloud min-version="32" max-version="36" />
     </dependencies>
+    <commands>
+        <command>OCA\NCDownloader\Command\Aria2Command</command>
+    </commands>
+    <settings>
+        <admin>OCA\NCDownloader\Settings\Admin</admin>
+        <admin-section>OCA\NCDownloader\Settings\AdminSection</admin-section>
+        <personal>OCA\NCDownloader\Settings\Personal</personal>
+        <personal-section>OCA\NCDownloader\Settings\PersonalSection</personal-section>
+    </settings>
     <navigations>
         <navigation>
             <name>MediaFetch</name>
@@ -31,13 +44,4 @@ MediaFetch is based on the original NCDownloader / Net loader project and contin
             <icon>mediafetch.svg</icon>
         </navigation>
     </navigations>
-    <settings>
-        <admin>OCA\NCDownloader\Settings\Admin</admin>
-        <personal>OCA\NCDownloader\Settings\Personal</personal>
-        <admin-section>OCA\NCDownloader\Settings\AdminSection</admin-section>
-        <personal-section>OCA\NCDownloader\Settings\PersonalSection</personal-section>
-    </settings>
-    <commands>
-        <command>OCA\NCDownloader\Command\Aria2Command</command>
-    </commands>
 </info>
