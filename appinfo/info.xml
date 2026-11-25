@@ -28,6 +28,15 @@ MediaFetch is based on the original NCDownloader / Net loader project and contin
         <php min-version="8.2" max-version="8.5" />
         <nextcloud min-version="32" max-version="36" />
     </dependencies>
+    <commands>
+        <command>OCA\NCDownloader\Command\Aria2Command</command>
+    </commands>
+    <settings>
+        <admin>OCA\NCDownloader\Settings\Admin</admin>
+        <admin-section>OCA\NCDownloader\Settings\AdminSection</admin-section>
+        <personal>OCA\NCDownloader\Settings\Personal</personal>
+        <personal-section>OCA\NCDownloader\Settings\PersonalSection</personal-section>
+    </settings>
     <navigations>
         <navigation>
             <name>MediaFetch</name>
@@ -35,13 +44,4 @@ MediaFetch is based on the original NCDownloader / Net loader project and contin
             <icon>mediafetch.svg</icon>
         </navigation>
     </navigations>
-    <settings>
-        <admin>OCA\NCDownloader\Settings\Admin</admin>
-        <personal>OCA\NCDownloader\Settings\Personal</personal>
-        <admin-section>OCA\NCDownloader\Settings\AdminSection</admin-section>
-        <personal-section>OCA\NCDownloader\Settings\PersonalSection</personal-section>
-    </settings>
-    <commands>
-        <command>OCA\NCDownloader\Command\Aria2Command</command>
-    </commands>
 </info>
