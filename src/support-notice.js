@@ -1,8 +1,11 @@
+import { generateUrl } from '@nextcloud/router';
+
 (() => {
     async function init() {
-        const notice = document.getElementById('mediafetch-support-notice');
-        if (!notice) return;
-        const url = OC.generateUrl('/apps/mediafetch/support-notice');
+        const template = document.getElementById('mediafetch-support-template');
+        if (!template) return;
+        const notice = template.content.firstElementChild.cloneNode(true);
+        const url = generateUrl('/apps/mediafetch/support-notice');
         const headers = { requesttoken: document.head.dataset.requesttoken };
         try {
             const response = await fetch(url, { headers, cache: 'no-store' });
@@ -31,6 +34,7 @@
                 buttons.forEach(item => { item.disabled = false; });
             }
         });
+        template.replaceWith(notice);
         notice.hidden = false;
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });

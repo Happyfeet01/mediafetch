@@ -1,0 +1,29 @@
+#mediafetch-support-notice {
+    box-sizing: border-box;
+    max-width: 34rem;
+    margin: .75rem;
+    padding: .75rem 1rem;
+    border: 1px solid var(--color-border, #ccc);
+    border-radius: var(--border-radius-large, 12px);
+    background: var(--color-main-background, #fff);
+    color: var(--color-main-text, #222);
+    overflow-wrap: anywhere;
+
+    &[hidden] { display: none; }
+
+    p { margin: .25rem 0; }
+
+    .support-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .25rem 1rem;
+    }
+
+    .support-links a {
+        color: inherit;
+        text-decoration: underline;
+        white-space: nowrap;
+    }
+
+    button { max-width: 100%; }
+}
