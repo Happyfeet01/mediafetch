@@ -4,6 +4,10 @@ All notable changes to MediaFetch will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.4]
+
+- Keep the optional developer support notice inside the download view on narrow screens.
+
 ## [2.0.3]
 
 - Add optional developer support links in the app and its store listing.
