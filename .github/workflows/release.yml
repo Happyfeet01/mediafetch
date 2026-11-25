@@ -145,6 +145,7 @@ jobs:
           printf '%s\n' "$APP_PRIVATE_KEY" > "$keys/mediafetch.key"
           printf '%s\n' "$APP_PUBLIC_CRT" > "$keys/mediafetch.crt"
           unset APP_PRIVATE_KEY APP_PUBLIC_CRT
+          umask 022
           stage="$RUNNER_TEMP/stage"
           out="$RUNNER_TEMP/signed"
           mkdir -p "$stage" "$out"
