@@ -4,6 +4,10 @@ All notable changes to MediaFetch will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.5]
+
+- Automate Nextcloud app signing and archive verification before publishing GitHub releases.
+
 ## [2.0.4]
 
 - Keep the optional developer support notice inside the download view on narrow screens.

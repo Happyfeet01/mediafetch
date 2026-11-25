@@ -1,124 +1,179 @@
-name: Publish MediaFetch GitHub release
+name: Build and sign MediaFetch release
 
 on:
   workflow_dispatch:
   push:
     branches: [master]
-    paths:
+    paths: &release_paths
       - 'appinfo/info.xml'
       - 'package.json'
       - 'docs/releases/**'
+      - '.github/workflows/release.yml'
+      - '.github/scripts/mediafetch-occ.sh'
+  pull_request:
+    branches: [master]
+    paths: *release_paths
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: mediafetch-release
+  group: mediafetch-release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
-    if: github.repository == 'Happyfeet01/mediafetch'
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Install PHP 8.4 with XML support
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           extensions: simplexml,xmlreader,mbstring
-          coverage: none
           tools: composer:v2
+          coverage: none
 
-      - name: Verify matching app and package versions
-        id: version
-        shell: bash
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Read release metadata from this commit
+        id: metadata
         run: |
           set -euo pipefail
-          APP_VERSION="$(php -r 'echo (string) simplexml_load_file("appinfo/info.xml")->version;')"
-          PKG_VERSION="$(node -p 'require("./package.json").version')"
-          test -n "$APP_VERSION"
-          test "$APP_VERSION" = "$PKG_VERSION"
-          echo "version=$APP_VERSION" >> "$GITHUB_OUTPUT"
-          echo "version=$APP_VERSION" >> "$GITHUB_ENV"
+          version=$(php -r 'echo simplexml_load_file("appinfo/info.xml")->version;')
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          test "$version" = "$(node -p 'require("./package.json").version')"
+          test -s "docs/releases/$version.md"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Avoid duplicate GitHub releases
-        id: existing
+      - name: Build and check release files
         env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          if gh release view "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo 'exists=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'exists=false' >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Install production PHP dependencies
-        if: steps.existing.outputs.exists != 'true'
-        run: composer install --no-interaction --prefer-dist --no-progress --no-dev --optimize-autoloader
-
-      - name: Validate PHP and bundled search/download regressions
-        if: steps.existing.outputs.exists != 'true'
-        shell: bash
+          VERSION: ${{ steps.metadata.outputs.version }}
         run: |
           set -euo pipefail
+          composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
           find appinfo lib templates -name '*.php' -type f -print0 | xargs -0 -n1 php -l >/dev/null
           php tests/downloader-ip.php
           php tests/yt-dlp-presets.php
           php tests/search-providers.php
           php tests/index-template.php
-
-      - name: Install Node.js 20
-        if: steps.existing.outputs.exists != 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Build frontend and verify translations
-        if: steps.existing.outputs.exists != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm install --no-audit --no-fund
+          npm install --include=dev --no-audit --no-fund
           node tests/l10n.cjs
           node tests/torrent-search-actions.cjs
           npm run build
-          test -s js/app.js
-          test -s js/appSettings.js
+          for file in js/app.js js/appSettings.js css/app.css css/appSettings.css vendor/autoload.php; do
+            test -s "$file"
+          done
+          stage="$RUNNER_TEMP/stage/mediafetch"
+          mkdir -p "$stage" "$RUNNER_TEMP/unsigned"
+          rsync -a ./ "$stage/" --exclude='.git' --exclude='.github' --exclude='node_modules' \
+            --exclude='/src' --exclude='/tests' --exclude='/dist' --exclude='/build' \
+            --exclude='package-lock.json' --exclude='*.map' --exclude='/appinfo/signature.json'
+          tar -czf "$RUNNER_TEMP/unsigned/package.tar.gz" -C "$RUNNER_TEMP/stage" mediafetch
+          cp "docs/releases/$VERSION.md" "$RUNNER_TEMP/unsigned/release.md"
 
-      - name: Package built MediaFetch for GitHub
-        if: steps.existing.outputs.exists != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/mediafetch-github-release/mediafetch
-          rsync -a ./ /tmp/mediafetch-github-release/mediafetch/ \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='node_modules' \
-            --exclude='src' \
-            --exclude='tests' \
-            --exclude='dist' \
-            --exclude='package-lock.json' \
-            --exclude='*.map'
-          tar -czf "mediafetch-${version}.tar.gz" -C /tmp/mediafetch-github-release mediafetch
-          sha256sum "mediafetch-${version}.tar.gz" > "mediafetch-${version}.tar.gz.sha256"
+      - name: Check isolated Nextcloud signing tools
+        if: github.event_name == 'pull_request'
+        run: bash .github/scripts/mediafetch-occ.sh "$RUNNER_TEMP/stage" check-tools
 
-      - name: Publish v${{ steps.version.outputs.version }} on GitHub
-        if: steps.existing.outputs.exists != 'true'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-mediafetch-${{ github.run_id }}
+          path: ${{ runner.temp }}/unsigned/
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
+
+  release:
+    needs: build
+    if: github.repository == 'Happyfeet01/mediafetch' && github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Check published release and tag
+        id: existing
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
         run: |
           set -euo pipefail
-          NOTES_FILE="docs/releases/${version}.md"
-          test -s "$NOTES_FILE"
-          gh release create "v${version}" \
-            "mediafetch-${version}.tar.gz" \
-            "mediafetch-${version}.tar.gz.sha256" \
-            --target "$GITHUB_SHA" \
-            --title "MediaFetch ${version}" \
-            --notes-file "$NOTES_FILE" \
-            --latest
+          tag="v$VERSION"
+          if gh release view "$tag" --json isDraft,assets > "$RUNNER_TEMP/existing.json"; then
+            if jq -e '.isDraft == false' "$RUNNER_TEMP/existing.json" >/dev/null; then
+              for suffix in tar.gz signature tar.gz.sha256; do
+                jq -e --arg name "mediafetch-$VERSION.$suffix" 'any(.assets[]; .name == $name)' "$RUNNER_TEMP/existing.json" >/dev/null
+              done
+              echo 'published=true' >> "$GITHUB_OUTPUT"
+            fi
+          fi
+          if git ls-remote --exit-code "https://github.com/$GH_REPO.git" "refs/tags/$tag" >/dev/null; then
+            tagged=$(gh api "repos/$GH_REPO/commits/$tag" --jq .sha)
+            test "$tagged" = "$GITHUB_SHA" || { echo "::error::Tag $tag belongs to another commit"; exit 1; }
+          fi
+
+      - uses: actions/download-artifact@v4
+        if: steps.existing.outputs.published != 'true'
+        with:
+          name: unsigned-mediafetch-${{ github.run_id }}
+          path: ${{ runner.temp }}/unsigned
+
+      - name: Sign and verify application and final archive
+        if: steps.existing.outputs.published != 'true'
+        env:
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+          APP_PUBLIC_CRT: ${{ secrets.APP_PUBLIC_CRT }}
+        run: |
+          set -euo pipefail
+          umask 077
+          : "${APP_PRIVATE_KEY:?Set the APP_PRIVATE_KEY Actions secret}"
+          : "${APP_PUBLIC_CRT:?Set the APP_PUBLIC_CRT Actions secret}"
+          keys=$(mktemp -d)
+          trap 'rm -rf -- "$keys"' EXIT
+          printf '%s\n' "$APP_PRIVATE_KEY" > "$keys/mediafetch.key"
+          printf '%s\n' "$APP_PUBLIC_CRT" > "$keys/mediafetch.crt"
+          unset APP_PRIVATE_KEY APP_PUBLIC_CRT
+          stage="$RUNNER_TEMP/stage"
+          out="$RUNNER_TEMP/signed"
+          mkdir -p "$stage" "$out"
+          tar -xzf "$RUNNER_TEMP/unsigned/package.tar.gz" -C "$stage"
+          bash .github/scripts/mediafetch-occ.sh "$stage" sign "$keys"
+          cd "$out"
+          archive="mediafetch-$VERSION.tar.gz"
+          tar -czf "$archive" -C "$stage" mediafetch
+          openssl dgst -sha512 -sign "$keys/mediafetch.key" -out "$RUNNER_TEMP/archive.sig" "$archive"
+          openssl base64 -A -in "$RUNNER_TEMP/archive.sig" -out "mediafetch-$VERSION.signature"
+          openssl base64 -d -A -in "mediafetch-$VERSION.signature" -out "$RUNNER_TEMP/verify.sig"
+          openssl x509 -in "$keys/mediafetch.crt" -pubkey -noout > "$RUNNER_TEMP/pubkey.pem"
+          openssl dgst -sha512 -verify "$RUNNER_TEMP/pubkey.pem" -signature "$RUNNER_TEMP/verify.sig" "$archive"
+          sha256sum "$archive" > "$archive.sha256"
+
+      - name: Publish verified files together
+        if: steps.existing.outputs.published != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="v$VERSION"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --draft --target "$GITHUB_SHA" --title "MediaFetch $VERSION" \
+              --notes-file "$RUNNER_TEMP/unsigned/release.md"
+          fi
+          gh release view "$tag" --json isDraft,targetCommitish | jq -e --arg sha "$GITHUB_SHA" \
+            '.isDraft and .targetCommitish == $sha' >/dev/null
+          cd "$RUNNER_TEMP/signed"
+          gh release upload "$tag" "mediafetch-$VERSION.tar.gz" "mediafetch-$VERSION.signature" \
+            "mediafetch-$VERSION.tar.gz.sha256" --clobber
+          gh release edit "$tag" --draft=false --latest
