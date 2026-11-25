@@ -1,35 +1,22 @@
-# MediaFetch App Store release notes
+# Signierte MediaFetch-Releases
 
-MediaFetch uses the Nextcloud app ID `mediafetch`.
+## Einmalig einrichten
 
-## Before the first App Store release
+Das bestehende Nextcloud-App-Zertifikat und den zugehörigen privaten PEM-Schlüssel im GitHub-Repository als Actions-Secrets hinterlegen. Auf dem Rechner mit den Zertifikatsdateien und einer angemeldeten GitHub CLI ausführen:
 
-1. Test the `mediafetch-rebrand` branch on Nextcloud 34 with at least one administrator and one normal user.
-2. Verify HTTP, magnet/torrent and yt-dlp downloads, folder selection, per-user settings and administrator settings.
-3. Finish the remaining public API/deprecation audit.
-4. Generate the MediaFetch signing key and certificate request. Keep the private key private and never commit it.
-5. Request the app certificate for `mediafetch` through the Nextcloud app certificate process.
-6. Create an App Store API token for the publishing account.
-7. Configure the repository release secrets only after the signing certificate is issued.
-8. Build the production assets and a package whose top-level directory is exactly `mediafetch`.
-9. Sign and validate the package before publishing the first stable `1.0.0` release.
+```bash
+gh secret set APP_PRIVATE_KEY --repo Happyfeet01/mediafetch < /var/www/nextcloud-signing/certificates/mediafetch.key
+gh secret set APP_PUBLIC_CRT --repo Happyfeet01/mediafetch < /var/www/nextcloud-signing/certificates/mediafetch.crt
+```
 
-## Signing material
+Damit erhält GitHub Actions den Schlüssel für Release-Läufe auf `master`. Änderungen am Release-Workflow und am Signierskript vor dem Merge prüfen. Pull Requests bauen und prüfen das Paket ohne Zugriff auf die Signiergeheimnisse.
 
-The private signing key must never be committed to this repository. The release workflow will eventually consume signing material from repository secrets.
+## Neue Version
 
-Expected secrets for automated publishing:
+1. Die Version in `appinfo/info.xml` und `package.json` erhöhen, den Changelog ergänzen und `docs/releases/<Version>.md` anlegen.
+2. Den geprüften Pull Request nach `master` mergen. Der Workflow übernimmt Version und Commit automatisch aus diesem Stand. Ein manueller Start über **Actions → Build and sign MediaFetch release → Run workflow → master** ist ebenfalls möglich.
+3. Der Workflow baut JavaScript, CSS und PHP-Abhängigkeiten. In einer temporären Nextcloud signiert und prüft `occ` das App-Verzeichnis. Anschließend wird das endgültige Archiv gepackt, mit SHA-512 signiert und die Signatur gegen den öffentlichen Schlüssel des App-Zertifikats geprüft.
+4. Das GitHub-Release enthält `mediafetch-<Version>.tar.gz`, `mediafetch-<Version>.signature` und die SHA-256-Prüfsumme. Erst wenn alle drei Dateien hochgeladen sind, wird der Entwurf veröffentlicht. Bereits veröffentlichte Assets werden nicht ersetzt. Bei fehlenden Secrets diese hinterlegen und den fehlgeschlagenen Job erneut ausführen.
+5. Für die Freigabe im Nextcloud App Store die öffentliche Download-URL genau dieses Archivs und den Base64-Inhalt der zugehörigen `.signature` verwenden. Der automatische Ablauf endet mit dem GitHub-Release.
 
-- `APP_PRIVATE_KEY`
-- `APP_PUBLIC_CRT`
-- `APPSTORE_TOKEN`
-
-## Compatibility target
-
-The first MediaFetch release targets the maintained Nextcloud releases 32 through 34, with Nextcloud 34 as the primary test target.
-
-## Migration from NCDownloader
-
-MediaFetch uses a different app ID, so Nextcloud treats it as a separate application. The application contains a legacy settings fallback that reads existing `ncdownloader` user/app configuration and copies values into the `mediafetch` namespace when accessed.
-
-Do not remove the old NCDownloader configuration from the database until MediaFetch has been tested successfully.
+Die App-ID lautet `mediafetch`. Für diesen Ablauf werden weder Zugriff auf die produktive Nextcloud noch ein App-Store-Token benötigt.
