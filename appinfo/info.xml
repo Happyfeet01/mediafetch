@@ -20,6 +20,8 @@ MediaFetch is based on the original NCDownloader / Net loader project and contin
     <website>https://github.com/Happyfeet01/mediafetch</website>
     <bugs>https://github.com/Happyfeet01/mediafetch/issues</bugs>
     <repository>https://github.com/Happyfeet01/mediafetch</repository>
+    <donation type="other" title="Unterstützung des Entwicklers über Ko-fi">https://ko-fi.com/dermueller</donation>
+    <donation type="paypal" title="Unterstützung des Entwicklers über PayPal">https://paypal.me/LarsM1980</donation>
     <dependencies>
         <php min-version="8.2" max-version="8.5" />
         <nextcloud min-version="32" max-version="36" />

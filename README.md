@@ -358,7 +358,7 @@ It is based on the original NCDownloader / Net loader project by Jiaxin Huang an
 
 I maintain this project and other open-source tools in my spare time. If my work is useful to you, you can support further development voluntarily:
 
-- [Buy Me a Coffee](https://buymeacoffee.com/sly5ir9ov)
+- [Ko-fi](https://ko-fi.com/dermueller)
 - [PayPal](https://paypal.me/LarsM1980)
 
 Bug reports, documentation improvements and contributions are just as welcome. Support is entirely optional.
