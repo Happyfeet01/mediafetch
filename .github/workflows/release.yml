@@ -178,3 +178,18 @@ jobs:
           gh release upload "$tag" "mediafetch-$VERSION.tar.gz" "mediafetch-$VERSION.signature" \
             "mediafetch-$VERSION.tar.gz.sha256" --clobber
           gh release edit "$tag" --draft=false --latest
+
+      - name: Publish signed archive to Nextcloud App Store
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APPSTORE_TOKEN: ${{ secrets.APPSTORE_TOKEN }}
+        run: |
+          set -euo pipefail
+          : "${APPSTORE_TOKEN:?Missing APPSTORE_TOKEN}"
+          mkdir -p "$RUNNER_TEMP/store"
+          cd "$RUNNER_TEMP/store"
+          gh release download "v$VERSION" --pattern "mediafetch-$VERSION.signature" --pattern "mediafetch-$VERSION.tar.gz" --pattern "mediafetch-$VERSION.tar.gz.sha256"
+          sha256sum -c "mediafetch-$VERSION.tar.gz.sha256"
+          url="https://github.com/$GH_REPO/releases/download/v$VERSION/mediafetch-$VERSION.tar.gz"
+          jq -n --arg download "$url" --arg signature "$(cat "mediafetch-$VERSION.signature")" '{download:$download,signature:$signature,nightly:false}' > payload.json
+          curl --fail-with-body --silent --show-error --header "Authorization: Token $APPSTORE_TOKEN" --header "Content-Type: application/json" --data-binary @payload.json https://apps.nextcloud.com/api/v1/apps/releases
